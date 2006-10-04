@@ -1,0 +1,18 @@
+something's wrong on your system : it was working yesterday, but not today : you will
+have to check what was changed
+
+on an rpm packaged linux box, you can first look at last install with the command
+rpm -qa --last
+
+then you will look check if some files were changed since the install, with the command
+rpm -Va
+rpm register many attributes (owner, group, size, mode, ..) in rpm database on install.
+
+Ok, you find some changes, how to restore original attributes of an rpm ?
+rpm provide you a way (http://www.rpm.org/hintskinks/restoreperm/), but it is not very verbose
+
+rpmrestore comes to produce a mode detailed output than "rpm -V", and allow partial, interactive restore.
+
+-- 
+Eric Gerbier
+$Id$

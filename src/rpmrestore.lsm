@@ -1,0 +1,15 @@
+Begin4
+Title:          rpmrestore
+Version:        0.1
+Entered-date:   2006-10-03
+Description:    The rpm database store user, group, time, mode for all files,
+		and offer a command to display the changes between install state (database)
+		and current disk state. rpmrestore will help you to restore install attributes
+Keywords:       administration,rpm
+Author:         gerbier@users.sourceforge.net (Eric Gerbier)
+Maintained-by:  gerbier@users.sourceforge.net (Eric Gerbier)
+Primary-site:   http://rpmrestore.sourceforge.net
+		340 Ko rpmrestore.tar.gz
+Platforms:      linux, works with perl
+Copying-policy: GPL
+End
