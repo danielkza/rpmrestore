@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+  <HEAD>
+    <TITLE>why rpmrestore</TITLE>
+    <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <META name="Author" content="Gerbier">
+    <META NAME="generator" CONTENT="vim">
+    <LINK rev="made" href="mailto:gerbier@users.sourceforge.net">
+  </HEAD>
+  <BODY>
+    
+    <H1 align=center>WHY RPMRESTORE</H1>
+    
+    I need it, I search on internet and do not find anything, so I write it ...
+    <BR>
+    in fact, rpm package provide some options, but they are very poor :
+    
+    <H2>check</H2>
+    the rpm command if <CODE>rpm -V</CODE>, but it does not show the differences :<BR>
+    <EM>
+      rpm -V rpm<BR>
+      .....UG. c /var/lib/rpm/Basenames<BR>
+      .....UG. c /var/lib/rpm/Conflictname<BR>
+      .....UG. c /var/lib/rpm/Dirnames<BR>
+      .....UG. c /var/lib/rpm/Filemd5s<BR>
+      .....UG. c /var/lib/rpm/Group<BR>
+      .....UG. c /var/lib/rpm/Installtid<BR>
+      .....UG. c /var/lib/rpm/Name<BR>
+      .....UG. c /var/lib/rpm/Packages<BR>
+      .....UG. c /var/lib/rpm/Providename<BR>
+      .....UG. c /var/lib/rpm/Provideversion<BR>
+      .....UG. c /var/lib/rpm/Requirename<BR>
+      .....UG. c /var/lib/rpm/Requireversion<BR>
+      .....UG. c /var/lib/rpm/Sha1header<BR>
+      .....UG. c /var/lib/rpm/Sigmd5<BR>
+      .....UG. c /var/lib/rpm/Triggername<BR>
+    </EM>
+    
+    <BR>
+    
+    <EM>
+      rpmrestore.pl -u -n -p rpm<BR>
+      /var/lib/rpm/Basenames user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Conflictname user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Dirnames user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Filemd5s user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Group user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Installtid user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Name user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Packages user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Providename user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Provideversion user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Requirename user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Requireversion user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Sha1header user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Sigmd5 user orig 37 (rpm) current 0 (root)<BR>
+      /var/lib/rpm/Triggername user orig 37 (rpm) current 0 (root)<BR>
+    </EM>
+    
+    
+    <H2>changes</H2>
+    the rpm command is <CODE>rpm --setugids/--setperms</CODE>, but it acts as a batch command
+    
+    <BR>
+    rpmrestore provide an interactive mode, allow to select parameters, can use log/rollback ...
+    Exemple : <CODE>rpmrestore -u -p rpm -l log</CODE>
+    
+    <HR>
+    <A href="main.html">back to main page</A>
+    
+  </BODY>
+</HTML>
