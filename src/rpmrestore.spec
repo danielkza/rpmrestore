@@ -3,7 +3,7 @@ Summary: rpmrestore
 # The Summary: line should be expanded to about here -----^
 #Summary(fr): (translated summary goes here)
 Name: rpmrestore
-Version: 0.1
+Version: 0.2
 Release: 1
 Group: Applications/System
 #Group(fr): (translated group goes here)
@@ -17,6 +17,7 @@ URL: http://rpmrestore.sourceforge.net
 #Prefix: /usr
 BuildArch: noarch
 Requires: perl
+Requires: rpm
 #Obsoletes: 
 #BuildRequires: 
 
@@ -59,5 +60,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc Readme
 
 %changelog
-* Fri Sep 22 2006  <gerbier@pocti3>
+* Thu Oct 6 2006  <gerbier@users.sourceforge.net> 0.2
+- test for superuser
+
+* Fri Sep 22 2006  <gerbier@users.sourceforge.net> 0.1
 - Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility

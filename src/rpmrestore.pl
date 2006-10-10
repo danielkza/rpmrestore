@@ -143,7 +143,7 @@ sub readlog($) {
 ###############################################################################
 #                             main
 ###############################################################################
-my $Version = '0.1';
+my $Version = '0.2';
 
 my $opt_help;
 my $opt_man;
@@ -172,7 +172,7 @@ GetOptions(
 		'verbose' => \$opt_verbose,
 		'version|V' => \$opt_version,
 		'batch'   => \$opt_batch,
-		'dryrun|n'  => \$opt_dryrun,
+		'dry-run|n'  => \$opt_dryrun,
 		'all'     => \$opt_flag_all,
 		'user'    => \$opt_flag_user,
 		'group'   => \$opt_flag_group,
@@ -215,6 +215,12 @@ if ($opt_file) {
 
 if ( !defined $opt_package ) {
 	pod2usage('missing rpm package name');
+}
+
+# test for superuser
+if ( (! $opt_dryrun ) and ($> != 0 ) ) {
+	warn "do not run on superuser : forced to dry-run\n";
+	$opt_dryrun = 1;
 }
 
 # check
@@ -266,7 +272,7 @@ foreach my $elem (@check) {
 		my $user     = getpwuid($uid);
 
 		my $action = sub { chown $rpm_uid, -1, $filename; };
-		ask($opt_dryrun, $opt_batch, $action, $filename, 'user', "$rpm_uid ($rpm_user))", "$uid ($user)" );
+		ask($opt_dryrun, $opt_batch, $action, $filename, 'user', "$rpm_uid ($rpm_user)", "$uid ($user)" );
 	}
 	if ( ($opt_flag_group) and ( $change =~ m/G/ ) ) {
 		my $rpm_group = $rpm_info->{group};
@@ -357,21 +363,21 @@ interactive change mode, on time attribute
 
 rpmrestore.pl -t -p rpm
 
-batch change mode (DANGEROUS) on mode attribute
+batch change mode (DANGEROUS) on mode attribute with log file
 
-rpmrestore.pl -a -b rpm
-
-interactive change of mode attribute on file /etc/motd
-
-rpmrestore.pl -m -l /tmp/log -f /etc/motd
+rpmrestore.pl -a -b rpm -l /tmp/log
 
 rollback changes from /tmp/log
 
 rpmrestore.pl -r /tmp/log
 
+interactive change of mode attribute on file /etc/motd
+
+rpmrestore.pl -m -f /etc/motd
+
 =head1 NOTES
 
-you should be superuser to use this program
+you should be superuser to restore attributes, other users can only check changes
 
 on batch mode, we recommend to use log file
 
