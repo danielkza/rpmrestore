@@ -386,6 +386,7 @@ options:
   -mode		apply on mode
   -time		apply on mtime
   -size		apply on size (just display)
+  -md5		apply on md5 (just display)
 
 =head1 OPTIONS
 
