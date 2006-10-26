@@ -23,24 +23,38 @@ use warnings;
 use Getopt::Long;    # arg analysis
 use Pod::Usage;
 use POSIX qw(strftime);
+use Digest::MD5;
 
 use Data::Dumper;
 
 my $fh_log;
+my $opt_verbose;
 
+###############################################################################
+sub debug($) {
+	my $text = shift(@_);
+	print "debug $text\n" if ($opt_verbose);
+	return;
+}
+###############################################################################
+sub warning($) {
+	my $text = shift(@_);
+	warn "WARNING $text\n";
+	return;
+}
 ###############################################################################
 # get all info about files from a package
 # and populate a hash of hash
 sub get_rpm_infos($) {
 	my $package = shift(@_);
 	my @info =
-`rpm -q --queryformat "[%6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILENAMES}\n]" $package `;
+`rpm -q --queryformat "[%6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILEMD5S} %{FILENAMES}\n]" $package `;
 
 	my %h;
 	foreach my $elem (@info) {
-		my ( $mode, $user, $group, $mtime, $size, $name ) = split ' ', $elem;
+		my ( $mode, $user, $group, $mtime, $size, $md5, $name ) = split ' ', $elem;
 		my %h2 =
-		  ( mode => $mode, user => $user, group => $group, mtime => $mtime, size => $size );
+		  ( mode => $mode, user => $user, group => $group, mtime => $mtime, size => $size, md5 => $md5 );
 		$h{$name} = \%h2;
 	}
 	return %h;
@@ -143,11 +157,10 @@ sub readlog($) {
 ###############################################################################
 #                             main
 ###############################################################################
-my $Version = '0.2';
+my $Version = '0.3';
 
 my $opt_help;
 my $opt_man;
-my $opt_verbose;
 my $opt_version;
 my $opt_batch;
 my $opt_dryrun;
@@ -163,6 +176,8 @@ my $opt_flag_time;
 my $opt_flag_user;
 my $opt_flag_group;
 my $opt_flag_size;
+my $opt_flag_md5;
+
 Getopt::Long::Configure('no_ignore_case');
 GetOptions(
 		'help|?'    => \$opt_help,
@@ -179,6 +194,7 @@ GetOptions(
 		'mode'    => \$opt_flag_mode,
 		'time'    => \$opt_flag_time,
 		'size'    => \$opt_flag_size,
+		'md5'    => \$opt_flag_md5,
 		'log=s'	  => \$opt_log,
 		'rollback=s' => \$opt_rollback,
 	) or pod2usage(2);
@@ -205,6 +221,7 @@ if ($opt_flag_all) {
 	$opt_flag_mode  = 1;
 	$opt_flag_time  = 1;
 	$opt_flag_size  = 1;
+	$opt_flag_md5  = 1;
 }
 
 if ($opt_file) {
@@ -219,12 +236,12 @@ if ( !defined $opt_package ) {
 
 # test for superuser
 if ( (! $opt_dryrun ) and ($> != 0 ) ) {
-	warn "do not run on superuser : forced to dry-run\n";
+	warning( "do not run on superuser : forced to dry-run\n");
 	$opt_dryrun = 1;
 }
 
 # check
-my @check = `rpm -V --nomd5 $opt_package`;
+my @check = `rpm -V $opt_package`;
 
 #print Dumper(@check);
 
@@ -236,7 +253,7 @@ my %infos = get_rpm_infos($opt_package);
 
 if ( $opt_log ) {
 	# open log file
-	open ($fh_log, '>', $opt_log ) or warn "can not open $opt_log : $!\n";
+	open ($fh_log, '>', $opt_log ) or warning( "can not open $opt_log : $!\n");
 }
 #print Dumper(%infos);
 # we can act on some changes :
@@ -249,6 +266,7 @@ foreach my $elem (@check) {
 	next if ( $elem =~ m/^missing/ );
 
 	my ( $change, $config, $filename ) = split( ' ', $elem );
+	debug("change=$change");
 
 	if ( $config ne 'c' ) {
 		$filename = $config;
@@ -256,6 +274,7 @@ foreach my $elem (@check) {
 	if ($opt_file) {
 		next if ( $filename ne $opt_file);
 	}
+	debug("filename=$filename");
 
 	# get current info
 	my (
@@ -302,6 +321,27 @@ foreach my $elem (@check) {
 		my $rpm_size = $rpm_info->{size};
 
 		display($filename, 'size', $rpm_size, $size );
+		
+		# no fix action on this parameter
+	}
+	if ( ($opt_flag_md5) and ( $change =~ m/5/ ) ) {
+		debug('md5');
+		my $rpm_md5 = $rpm_info->{md5};
+
+		my $ctx = Digest::MD5->new;
+
+		my $fh_fic;
+		my $cur_md5;
+		if ( open ($fh_fic, '<', $filename) ) {
+			$ctx->addfile($fh_fic);
+			$cur_md5 = $ctx->hexdigest();
+			close($fh_fic);
+		} else {
+			warning("can not open $filename : $!");
+			$cur_md5 = '';
+		}
+
+		display($filename, 'md5', $rpm_md5, $cur_md5 );
 		
 		# no fix action on this parameter
 	}

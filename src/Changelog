@@ -1,3 +1,7 @@
+2006-10-26 Eric Gerbier <gerbier@users.sourceforge.net> 0.3
+	* add md5 attribute (compare only)
+	* add debug and warning sub
+
 2006-10-10 Eric Gerbier <gerbier@users.sourceforge.net> 0.2
 	* test for superuser account and force dry-run if not
 

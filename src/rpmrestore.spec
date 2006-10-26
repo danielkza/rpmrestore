@@ -3,7 +3,7 @@ Summary: rpmrestore
 # The Summary: line should be expanded to about here -----^
 #Summary(fr): (translated summary goes here)
 Name: rpmrestore
-Version: 0.2
+Version: 0.3
 Release: 1
 Group: Applications/System
 #Group(fr): (translated group goes here)
@@ -60,6 +60,9 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc Readme
 
 %changelog
+* Thu Oct 26 2006 Eric Gerbier <gerbier@users.sourceforge.net> 0.3
+- add md5 attribute (compare only)
+
 * Thu Oct 6 2006  <gerbier@users.sourceforge.net> 0.2
 - test for superuser
 

@@ -42,7 +42,7 @@ dist : $(DOC) $(MANPAGES1) $(SCRIPTS)
 	rm -rf $(PACKAGE)-$(VERSION)
 
 rpm : dist
-	rpmbuild -tb --sign $(PACKAGE).tar.gz
+	rpmbuild -ta --sign $(PACKAGE).tar.gz
 	
 clean :
 	rm $(MANPAGES1)

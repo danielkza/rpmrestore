@@ -1,7 +1,7 @@
 Begin4
 Title:          rpmrestore
-Version:        0.2
-Entered-date:   2006-10-10
+Version:        0.3
+Entered-date:   2006-10-17
 Description:    The rpm database store user, group, time, mode for all files,
 		and offer a command to display the changes between install state (database)
 		and current disk state. rpmrestore will help you to restore install attributes
