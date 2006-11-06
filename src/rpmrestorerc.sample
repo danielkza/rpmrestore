@@ -1,0 +1,14 @@
+# rc file exemple for rpmrestore
+# should be copied on your home directory in .rpmrestorerc file
+
+# no verbose mode
+verbose = 0
+
+# interactive mode
+batch = 0
+
+# dryrun mode
+dry-run = 1
+
+# log file
+log = /tmp/rpmrestore.log
