@@ -15,8 +15,12 @@ DOC = Authors  Changelog  COPYING NEWS Todo $(PACKAGE).lsm $(PACKAGE).spec Makef
 MANPAGES1 = $(PACKAGE).1
 SCRIPTS = $(PACKAGE).pl
 
+# convert pod to other doc format
 %.1 : %.pl
 	pod2man $^ > $@
+
+%.1.html : %.pl
+	pod2html --header $^ > $@
 
 # default target : build man
 man : $(MANPAGES1)
@@ -39,15 +43,17 @@ uninstall :
 dist : $(DOC) $(MANPAGES1) $(SCRIPTS)
 	mkdir $(PACKAGE)-$(VERSION)
 	cp $(DOC) $(MANPAGES1) $(SCRIPTS) $(PACKAGE)-$(VERSION)
-	tar cvfz $(PACKAGE).tar.gz $(PACKAGE)-$(VERSION)
+	tar cvfz $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
 	rm -rf $(PACKAGE)-$(VERSION)
 
 rpm : dist
-	rpmbuild -ta --sign $(PACKAGE).tar.gz
+	rpmbuild -ta --sign $(PACKAGE)-$(VERSION).tar.gz
 	
 clean :
-	rm $(MANPAGES1)
-	rm $(PACKAGE).tar.gz
+	rm -f $(MANPAGES1)
+	rm -f $(PACKAGE)-$(VERSION).tar.gz
+	rm -f pod2*
+	
 
 # to be done on root account juster after the package install
 test :
@@ -55,4 +61,5 @@ test :
 	rpm -V rpmrestore || echo
 	rpmrestore.pl -p rpmrestore -b
 	rpm -V rpmrestore
-	
+
+html : rpmrestore.1.html
