@@ -1,3 +1,13 @@
+2006-11-08 Eric Gerbier <gerbier@users.sourceforge.net> 0.8
+	* add info sub
+	* add doc for all attributes
+	* can use rcfile
+	* recode rollback to use options (batch, dryrun, attributes choice)
+	* default behavior is to work on all attributes
+	* attributes can now be negative (unselected)
+	* append on log file if it exists
+	* remove call to external touch program
+
 2006-10-26 Eric Gerbier <gerbier@users.sourceforge.net> 0.3
 	* add md5 attribute (compare only)
 	* add debug and warning sub

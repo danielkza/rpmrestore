@@ -3,7 +3,7 @@ Summary: rpmrestore
 # The Summary: line should be expanded to about here -----^
 #Summary(fr): (translated summary goes here)
 Name: rpmrestore
-Version: 0.3
+Version: 0.8
 Release: 1
 Group: Applications/System
 #Group(fr): (translated group goes here)
@@ -58,8 +58,19 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc Todo
 %doc Makefile
 %doc Readme
+%doc rpmrestorerc.sample
 
 %changelog
+* Thu Nov 08 2006 Eric Gerbier <gerbier@users.sourceforge.net> 0.8
+- add info sub
+- add doc for all attributes
+- can use rcfile
+- recode rollback to use options (batch, dryrun, attributes choice)
+- default behavior is to work on all attributes
+- attributes can now be negative (unselected)
+- append on log file if it exists
+- remove call to external touch program
+
 * Thu Oct 26 2006 Eric Gerbier <gerbier@users.sourceforge.net> 0.3
 - add md5 attribute (compare only)
 

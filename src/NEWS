@@ -1,3 +1,16 @@
+			0.8 version
+			-------------
+incompatibility : 
+* the log format was changed (previous log will not work with this release)
+* default behavior is to work on all attributes
+
+bugfix : 
+* rollback was fixed
+
+new features :
+* can use rcfile
+* recode rollback to use options (batch, dryrun, attributes choice)
+----------------------------------------------------------------
 			0.3 version
 			-------------
 add md5 attribute (compare only)
