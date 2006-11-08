@@ -18,7 +18,7 @@ SCRIPTS = $(PACKAGE).pl
 %.1 : %.pl
 	pod2man $^ > $@
 
-all: $(MANPAGES1)
+all: man
 
 install : $(DOC) $(MANPAGES1) $(SCRIPTS)
 	mkdir -p              $(BINDIR)
