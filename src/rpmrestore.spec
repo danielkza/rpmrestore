@@ -1,14 +1,15 @@
+%define VERSION 0.8
 # Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
 Summary: rpmrestore
 # The Summary: line should be expanded to about here -----^
 #Summary(fr): (translated summary goes here)
 Name: rpmrestore
-Version: 0.8
+Version: %{VERSION}
 Release: 1
 Group: Applications/System
 #Group(fr): (translated group goes here)
 License: GPL
-Source: rpmrestore.tar.gz
+Source: rpmrestore-%{VERSION}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-root
 # Following are optional fields
 URL: http://rpmrestore.sourceforge.net
