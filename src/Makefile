@@ -18,7 +18,10 @@ SCRIPTS = $(PACKAGE).pl
 %.1 : %.pl
 	pod2man $^ > $@
 
-all: man
+# default target : build man
+man : $(MANPAGES1)
+
+all: install
 
 install : $(DOC) $(MANPAGES1) $(SCRIPTS)
 	mkdir -p              $(BINDIR)
@@ -33,8 +36,6 @@ uninstall :
 	cd $(MAN1DIR) && rm ${MANPAGES1}
 	rm -rf $(DOCDIR)
 
-man : $(MANPAGES1)
-
 dist : $(DOC) $(MANPAGES1) $(SCRIPTS)
 	mkdir $(PACKAGE)-$(VERSION)
 	cp $(DOC) $(MANPAGES1) $(SCRIPTS) $(PACKAGE)-$(VERSION)
@@ -48,3 +49,10 @@ clean :
 	rm $(MANPAGES1)
 	rm $(PACKAGE).tar.gz
 
+# to be done on root account juster after the package install
+test :
+	touch $(BINDIR)/${SCRIPTS}
+	rpm -V rpmrestore || echo
+	rpmrestore.pl -p rpmrestore -b
+	rpm -V rpmrestore
+	
