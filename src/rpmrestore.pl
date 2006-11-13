@@ -422,7 +422,7 @@ sub change_time($$) {
 ###############################################################################
 #                             main
 ###############################################################################
-my $Version = '0.8a';
+my $Version = '0.9';
 
 $| = 1;
 
@@ -516,7 +516,7 @@ if ($opt_flag_all) {
 
 # test for superuser
 if ( ( !$opt_dryrun ) and ( $> != 0 ) ) {
-	warning("do not run on superuser : forced to dry-run\n");
+	warning("do not run on superuser : forced to dry-run");
 	$opt_dryrun = 1;
 }
 
@@ -538,7 +538,7 @@ if ($opt_log) {
 		debug("log on new file $opt_log");
 	}
 	open( $fh_log, $open_mode, $opt_log )
-	  or warning("can not open log file $opt_log : $!\n");
+	  or warning("can not open log file $opt_log : $!");
 }
 
 if ($opt_rollback) {
@@ -553,13 +553,38 @@ if ($opt_rollback) {
 
 if ($opt_file) {
 
-	# get rpm from file
-	$opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
-	info("package is $opt_package");
+	# check if file exists
+	if ( -e $opt_file ) {
+
+		# get rpm from file
+		$opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
+
+	   # test result
+	   # localisation will prevent to test for keyword as :
+	   #if ( $opt_package =~ m/is not owned by any package/) {
+	   # so another way is : a good answer is only one package, so only one word
+		my @rep = split( /\s/, $opt_package );
+		if ( scalar(@rep) == 1 ) {
+			info("package is $opt_package");
+		}
+		else {
+			pod2usage("$opt_package is not owned by any package");
+		}
+	}
+	else {
+		pod2usage("can not find $opt_file file");
+	}
 }
 
-if ( !defined $opt_package ) {
+if ( !$opt_package ) {
 	pod2usage('missing rpm package name');
+}
+
+# check if package exists
+debug("test if package $opt_package exists");
+system("rpm -q $opt_package > /dev/null");
+if ( $? != 0 ) {
+	pod2usage("$opt_package : package does not exists");
 }
 
 # check
@@ -568,7 +593,7 @@ my @check = `rpm -V $opt_package`;
 #print Dumper(@check);
 
 if ( !@check ) {
-	info("nothing was changed");
+	info('no changes detected');
 	exit;
 }
 my %infos = get_rpm_infos($opt_package);
