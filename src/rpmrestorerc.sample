@@ -12,3 +12,16 @@ dry-run = 1
 
 # log file
 log = /tmp/rpmrestore.log
+
+# attributes
+# set to 1 to use it
+# set to 0 to ignore it
+# the default is all to 1
+
+# user = 1
+# group = 1
+# mode = 1
+# mode = 1
+# time = 1
+# size = 1
+# md5 = 1
