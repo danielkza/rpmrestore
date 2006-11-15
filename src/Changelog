@@ -1,3 +1,8 @@
+2006-11-15 Eric Gerbier <gerbier@users.sourceforge.net> 0.9
+	* add more tests (if package exists, if file exists ...)
+	* add more infos
+	* add regression tests (test_rpmrestore.pl)
+
 2006-11-08 Eric Gerbier <gerbier@users.sourceforge.net> 0.8
 	* add info sub
 	* add doc for all attributes

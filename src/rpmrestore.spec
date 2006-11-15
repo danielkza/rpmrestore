@@ -1,4 +1,4 @@
-%define VERSION 0.8
+%define VERSION 0.9
 # Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
 Summary: rpmrestore
 # The Summary: line should be expanded to about here -----^
@@ -60,8 +60,14 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc Makefile
 %doc Readme
 %doc rpmrestorerc.sample
+%doc test_rpmrestore.pl
 
 %changelog
+* Thu Nov 15 2006 Eric Gerbier <gerbier@users.sourceforge.net> 0.9
+- add more tests (if package exists, if file exists ...)
+- add more infos
+- add regression tests (test_rpmrestore.pl)
+
 * Thu Nov 08 2006 Eric Gerbier <gerbier@users.sourceforge.net> 0.8
 - add info sub
 - add doc for all attributes

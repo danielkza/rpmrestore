@@ -11,7 +11,7 @@ MANDIR = $(DESTDIR)/usr/share/man
 MAN1DIR = $(MANDIR)/man1
 DOCDIR=$(DESTDIR)/usr/share/doc/$(PACKAGE)-$(VERSION)
 
-DOC = Authors  Changelog  COPYING NEWS Todo $(PACKAGE).lsm $(PACKAGE).spec Makefile Readme rpmrestorerc.sample
+DOC = Authors  Changelog  COPYING NEWS Todo $(PACKAGE).lsm $(PACKAGE).spec Makefile Readme rpmrestorerc.sample test_rpmrestore.pl
 MANPAGES1 = $(PACKAGE).1
 SCRIPTS = $(PACKAGE).pl
 
