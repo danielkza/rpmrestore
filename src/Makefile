@@ -57,9 +57,20 @@ clean :
 
 # to be done on root account juster after the package install
 test :
-	touch $(BINDIR)/${SCRIPTS}
-	rpm -V rpmrestore || echo
-	rpmrestore.pl -p rpmrestore -b
-	rpm -V rpmrestore
+	./test_rpmrestore.pl
 
 html : rpmrestore.1.html
+
+help :
+	@echo "available target are :"
+	@echo "make : build files"
+	@echo "make man : build man page from pod"
+	@echo "make install : install software"
+	@echo "make all : same as make install"
+	@echo "make uninstall : remove software"
+	@echo "make dist : build a tar.gz package"
+	@echo "make rpm : build an rpm package"
+	@echo "make clean : remove temporary files"
+	@echo "make test : test rpmrestore software (need to be root for full test"
+	@echo "make html : build html doc from pod"
+	@echo "make help : this help"
