@@ -111,6 +111,8 @@ if ( $> == 0 ) {
 	# 17 interactive change
 	$out = `echo 'y' | ./rpmrestore.pl -f $file  2>&1`;
 	like( $out, qr/1 changes applied/, 'interactive changes' );
+
+	unlink $log;
 }
 else {
 	diag('you should be root to run other tests');
