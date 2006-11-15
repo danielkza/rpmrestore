@@ -31,6 +31,8 @@ use Data::Dumper;    # debug
 my $fh_log;          # file handle to log file
 my $opt_verbose;
 
+my $nb_change_made = 0;
+
 # whe should use only this sub, and no print
 ###############################################################################
 sub debug($) {
@@ -115,6 +117,7 @@ sub ask($$$$$$$) {
 		&$action;
 		info("change $type on $filename");
 		writelog( $filename, $type, $orig, $current );
+		$nb_change_made++;
 	}
 	else {
 		debug("dryrun mode : mo changes");
@@ -179,7 +182,8 @@ sub rollback($$$$$$$) {
 
 	info("rollaback from $log");
 
-	my $line = 0;
+	my $line        = 0;
+	my $nb_rollback = 0;
 	while (<$fh_roll>) {
 		$line++;
 		chomp;
@@ -201,137 +205,155 @@ sub rollback($$$$$$$) {
 
 			# param will be restored to $from
 
-			if ( ( $param eq 'user' ) and ($opt_user) ) {
-				my ( $to_uid, $to_user ) = get_val($to);
+			if ( $param eq 'user' ) {
+				if ($opt_user) {
+					my ( $to_uid, $to_user ) = get_val($to);
 
-				# check log format
-				if ( defined $to_uid ) {
+					# check log format
+					if ( defined $to_uid ) {
 
-					# check if current value is same than $to
+						# check if current value is same than $to
 
-					my $cur_uid = $cur_stat->uid();
-					if ( $cur_uid != $to_uid ) {
-						warning(
+						my $cur_uid = $cur_stat->uid();
+						if ( $cur_uid != $to_uid ) {
+							warning(
 "current uid $cur_uid does not match rollback value : $to_uid (line $line)"
-						);
-					}
-					else {
-						my ( $from_uid, $from_user ) = get_val($from);
-
-						# check log format
-						if ( defined $from_uid ) {
-							my $action =
-							  sub { change_user( $from_uid, $fic ); };
-							ask( $opt_dryrun, $opt_batch, $action, $fic, 'user',
-								$from, $to );
-						}
-						else {
-							warning(
-"bad log format for 'from' field : $from (line $line)"
 							);
 						}
+						else {
+							my ( $from_uid, $from_user ) = get_val($from);
+
+							# check log format
+							if ( defined $from_uid ) {
+								my $action =
+								  sub { change_user( $from_uid, $fic ); };
+								ask( $opt_dryrun, $opt_batch, $action, $fic,
+									'user', $from, $to );
+								$nb_rollback++;
+							}
+							else {
+								warning(
+"bad log format for 'from' field : $from (line $line)"
+								);
+							}
+						}
+					}
+					else {
+						warning(
+							"bad log format for 'to' field : $to (line $line)");
 					}
 				}
-				else {
-					warning("bad log format for 'to' field : $to (line $line)");
-				}
 			}
-			elsif ( ( $param eq 'group' ) and ($opt_group) ) {
-				my ( $to_gid, $to_group ) = get_val($to);
+			elsif ( $param eq 'group' ) {
+				if ($opt_group) {
+					my ( $to_gid, $to_group ) = get_val($to);
 
-				# check log format
-				if ( defined $to_gid ) {
+					# check log format
+					if ( defined $to_gid ) {
 
-					# check if current value is same than $to
+						# check if current value is same than $to
 
-					my $cur_gid = $cur_stat->gid();
-					if ( $cur_gid != $to_gid ) {
-						warning(
+						my $cur_gid = $cur_stat->gid();
+						if ( $cur_gid != $to_gid ) {
+							warning(
 "current gid $cur_gid does not match rollback value : $to_gid (line $line)"
-						);
-					}
-					else {
-						my ( $from_gid, $from_group ) = get_val($from);
-
-						# check log format
-						if ( defined $from_gid ) {
-							my $action =
-							  sub { change_group( $from_gid, $fic ); };
-							ask( $opt_dryrun, $opt_batch, $action, $fic,
-								'group', $from, $to );
-						}
-						else {
-							warning(
-"bad log format for 'from' field : $from (line $line)"
 							);
 						}
+						else {
+							my ( $from_gid, $from_group ) = get_val($from);
+
+							# check log format
+							if ( defined $from_gid ) {
+								my $action =
+								  sub { change_group( $from_gid, $fic ); };
+								ask( $opt_dryrun, $opt_batch, $action, $fic,
+									'group', $from, $to );
+								$nb_rollback++;
+							}
+							else {
+								warning(
+"bad log format for 'from' field : $from (line $line)"
+								);
+							}
+						}
 					}
-				}
-				else {
-					warning("bad log format for 'to' field : $to (line $line)");
-				}
-			}
-			elsif ( ( $param eq 'mtime' ) and ($opt_time) ) {
-				my ( $to_epoch, $to_mtime ) = get_val($to);
-
-				# check log format
-				if ( defined $to_epoch ) {
-
-					# check if current value is same than $to
-
-					my $cur_epoch = $cur_stat->mtime();
-					if ( $cur_epoch != $to_epoch ) {
+					else {
 						warning(
+							"bad log format for 'to' field : $to (line $line)");
+					}
+				}
+			}
+			elsif ( $param eq 'mtime' ) {
+				if ($opt_time) {
+					my ( $to_epoch, $to_mtime ) = get_val($to);
+
+					# check log format
+					if ( defined $to_epoch ) {
+
+						# check if current value is same than $to
+
+						my $cur_epoch = $cur_stat->mtime();
+						if ( $cur_epoch != $to_epoch ) {
+							warning(
 "current mtime $cur_epoch does not match rollback value : $to_epoch (line $line)"
+							);
+						}
+						else {
+							my ( $from_epoch, $from_mtime ) = get_val($from);
+
+							# check log format
+							if ( defined $from_epoch ) {
+								my $action =
+								  sub { change_time( $from_epoch, $fic ); };
+								ask( $opt_dryrun, $opt_batch, $action, $fic,
+									'mtime', $from, $to );
+								$nb_rollback++;
+							}
+							else {
+								warning(
+"bad log format for 'from' field : $from (line $line)"
+								);
+							}
+						}
+					}
+					else {
+						warning(
+							"bad log format for 'to' field : $to (line $line)");
+					}
+				}
+			}
+			elsif ( $param eq 'mode' ) {
+				if ($opt_mode) {
+
+					my $cur_mode = $cur_stat->mode();
+
+					my $to_mode = $to;
+					if ( $to_mode != $cur_mode ) {
+						warning(
+"current mode $cur_mode does not match rollback value : $to_mode (line $line)"
 						);
 					}
 					else {
-						my ( $from_epoch, $from_mtime ) = get_val($from);
-
-						# check log format
-						if ( defined $from_epoch ) {
-							my $action =
-							  sub { change_time( $from_epoch, $fic ); };
-							ask( $opt_dryrun, $opt_batch, $action, $fic,
-								'mtime', $from, $to );
-						}
-						else {
-							warning(
-"bad log format for 'from' field : $from (line $line)"
-							);
-						}
+						my $action = sub { change_mode( $from, $fic ); };
+						ask( $opt_dryrun, $opt_batch, $action, $fic, 'mode',
+							$from, $to );
+						$nb_rollback++;
 					}
-				}
-				else {
-					warning("bad log format for 'to' field : $to (line $line)");
-				}
-			}
-			elsif ( ( $param eq 'mode' ) and ($opt_mode) ) {
-
-				my $cur_mode = $cur_stat->mode();
-
-				my $to_mode = $to;
-				if ( $to_mode != $cur_mode ) {
-					warning(
-"current mode $cur_mode does not match rollback value : $to_mode (line $line)"
-					);
-				}
-				else {
-					my $action = sub { change_mode( $from, $fic ); };
-					ask( $opt_dryrun, $opt_batch, $action, $fic, 'mode', $from,
-						$to );
 				}
 			}
 			else {
-				warning("bad parameter on line $line : $_");
+				warning("bad parameter $param on line $line : $_");
 			}
 		}
 		else {
 			warning("bad log line $line : $_");
 		}
 	}
-
 	close $fh_roll;
+
+	# stats
+	info "rollback $nb_rollback attributes";
+	info("$nb_change_made changes applied");
 
 	return;
 }
@@ -465,8 +487,7 @@ my %opt = (
 	'size'     => \$opt_flag_size,
 	'md5'      => \$opt_flag_md5,
 	'log'      => \$opt_log,
-	'rollback' => \$opt_rollback,
-
+	'rollback' => \$opt_rollback
 );
 
 # get options from optionnal rcfile
@@ -593,7 +614,7 @@ my @check = `rpm -V $opt_package`;
 #print Dumper(@check);
 
 if ( !@check ) {
-	info('no changes detected');
+	info('0 changes detected');
 	exit;
 }
 my %infos = get_rpm_infos($opt_package);
@@ -605,6 +626,7 @@ my %infos = get_rpm_infos($opt_package);
 # T mtime
 # M mode
 
+my $nb_changes = 0;
 foreach my $elem (@check) {
 	next if ( $elem =~ m/^missing/ );
 	next if ( $elem =~ m/^Unsatisfied/ );
@@ -642,6 +664,7 @@ foreach my $elem (@check) {
 			set_val( $rpm_uid, $rpm_user ),
 			set_val( $uid,     $user )
 		);
+		$nb_changes++;
 	}
 	if ( ($opt_flag_group) and ( $change =~ m/G/ ) ) {
 		my $rpm_group = $rpm_info->{group};
@@ -655,6 +678,7 @@ foreach my $elem (@check) {
 			set_val( $rpm_gid, $rpm_group ),
 			set_val( $gid,     $group )
 		);
+		$nb_changes++;
 	}
 	if ( ($opt_flag_time) and ( $change =~ m/T/ ) ) {
 		my $rpm_mtime   = $rpm_info->{mtime};
@@ -668,7 +692,7 @@ foreach my $elem (@check) {
 			set_val( $rpm_mtime, $rpm_h_mtime ),
 			set_val( $cur_mtime, $cur_h_mtime )
 		);
-
+		$nb_changes++;
 	}
 	if ( ($opt_flag_mode) and ( $change =~ m/M/ ) ) {
 		my $rpm_mode = $rpm_info->{mode};
@@ -677,6 +701,7 @@ foreach my $elem (@check) {
 		my $action = sub { change_mode( $rpm_mode, $filename ); };
 		ask( $opt_dryrun, $opt_batch, $action, $filename, 'mode', $rpm_mode,
 			$h_mode );
+		$nb_changes++;
 	}
 	if ( ($opt_flag_size) and ( $change =~ m/S/ ) ) {
 		my $rpm_size = $rpm_info->{size};
@@ -685,6 +710,7 @@ foreach my $elem (@check) {
 		display( $filename, 'size', $rpm_size, $size );
 
 		# no fix action on this parameter
+		$nb_changes++;
 	}
 	if ( ($opt_flag_md5) and ( $change =~ m/5/ ) ) {
 		debug('md5');
@@ -707,9 +733,14 @@ foreach my $elem (@check) {
 		display( $filename, 'md5', $rpm_md5, $cur_md5 );
 
 		# no fix action on this parameter
+		$nb_changes++;
 	}
 }
 close($fh_log) if ($opt_log);
+
+# stats
+info("$nb_changes changes detected");
+info("$nb_change_made changes applied");
 
 __END__
 
@@ -880,7 +911,6 @@ verbose = 0
 dry-run = 1
 
 batch = 0
-
 
 =head1 NOTES
 

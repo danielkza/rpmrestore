@@ -56,7 +56,7 @@ like( $out, qr/is not owned by any package/, 'not from rpm' );
 
 # 8 no changes on package
 $out = `./rpmrestore.pl -p rpmrestore 2>&1`;
-like( $out, qr/no changes detected/, 'package no changes' );
+like( $out, qr/0 changes detected/, 'package no changes' );
 
 # we work on rpm package, so the rpm should exist
 my $file = '/bin/rpm';
@@ -64,7 +64,7 @@ if ( -e $file ) {
 
 	# 9 no changes on file
 	$out = `./rpmrestore.pl  -n -f $file 2>&1`;
-	like( $out, qr/no changes detected/, 'file no changes' );
+	like( $out, qr/0 changes detected/, 'file no changes' );
 }
 else {
 	diag("can not find $file file");
@@ -79,7 +79,7 @@ if ( $> == 0 ) {
 
 	# 10 no changes on attribute
 	$out = `./rpmrestore.pl -mode -n -f $file 2>&1`;
-	like( $out, qr/no changes detected/, 'attribute no changes' );
+	like( $out, qr/0 changes detected/, 'attribute no changes' );
 
 	# 11 test attribute change
 	$out = `./rpmrestore.pl -t -n -f $file 2>&1`;
@@ -94,7 +94,7 @@ if ( $> == 0 ) {
 
 	# 13 check restore
 	$out = `./rpmrestore.pl -t -n -f $file 2>&1`;
-	like( $out, qr/no changes detected/, 'check restore' );
+	like( $out, qr/0 changes detected/, 'check restore' );
 
 	# 14 rollback 1
 	$out = `./rpmrestore.pl -mode -b -r $log 2>&1`;
@@ -106,7 +106,7 @@ if ( $> == 0 ) {
 
 	# 16 interactive change
 	$out = `echo 'n' | ./rpmrestore.pl -f $file  2>&1`;
-	like( $out, qr/no changes applied/, 'interactive no changes' );
+	like( $out, qr/0 changes applied/, 'interactive no changes' );
 
 	# 17 interactive change
 	$out = `echo 'y' | ./rpmrestore.pl -f $file  2>&1`;

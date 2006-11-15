@@ -1,3 +1,13 @@
+			0.9 version
+			-------------
+
+incompatibility : none
+bugfix : none
+new features :
+* add more tests (if package exists, if file exists ...)
+* add more infos
+* add regression tests (test_rpmrestore.pl)
+----------------------------------------------------------------
 			0.8 version
 			-------------
 incompatibility : 
