@@ -1,8 +1,8 @@
-%define VERSION 0.9
+%define VERSION 1.0
 # Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
-Summary: rpmrestore
+Summary: rpmrestore restore file attributes from rpm database
 # The Summary: line should be expanded to about here -----^
-#Summary(fr): (translated summary goes here)
+Summary(fr): rpmrestore restore les attributs d'installation
 Name: rpmrestore
 Version: %{VERSION}
 Release: 1
@@ -23,19 +23,22 @@ Requires: rpm
 #BuildRequires: 
 
 %description
-The rpm database store user, group, time, mode for all files,
-and offer a command to display the changes between install state (database)
-and current disk state. rpmrestore will help you to restore install attributes
+The rpm database store user, group, time, mode for all files.
+Rpmrestore allow to display the change between the current state and the rpm 
+database. Il also allow to restore this attribute to their install value.
 
-#%description -l fr
-#(translated description goes here)
+%description -l fr
+La base de données rpm conserve pour chaque fichier les attributs :
+proprietaire, groupe, taille, date de modification, checksum.
+Rpmrestore permet de comparer les attributs courants avec ceux de la base rpm, 
+et de les restaurer à leur valeur originale.
 
 %prep
 %setup
 #%patch
 
 %build
-echo "build"
+#echo "build"
 make
 
 %install
@@ -63,6 +66,10 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc test_rpmrestore.pl
 
 %changelog
+* Fri Dec 07 2006 Eric Gerbier <gerbier@users.sourceforge.net> 1.0
+- add french translation in spec
+- add perl syntaxe checking on "build" (makefile)
+
 * Thu Nov 15 2006 Eric Gerbier <gerbier@users.sourceforge.net> 0.9
 - add more tests (if package exists, if file exists ...)
 - add more infos
