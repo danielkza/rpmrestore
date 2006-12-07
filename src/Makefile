@@ -23,7 +23,9 @@ SCRIPTS = $(PACKAGE).pl
 	pod2html --header $^ > $@
 
 # default target : build man
+# and check syntaxe
 man : $(MANPAGES1)
+	perl -cw $(SCRIPTS)
 
 all: install
 
