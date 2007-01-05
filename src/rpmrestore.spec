@@ -1,4 +1,4 @@
-%define VERSION 1.0
+%define VERSION 1.1
 # Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
 Summary: rpmrestore restore file attributes from rpm database
 # The Summary: line should be expanded to about here -----^
@@ -66,6 +66,9 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc test_rpmrestore.pl
 
 %changelog
+* Fri Jan 05 2007 Eric Gerbier <gerbier@users.sourceforge.net> 1.1
+- fix a bug for directories
+
 * Fri Dec 07 2006 Eric Gerbier <gerbier@users.sourceforge.net> 1.0
 - add french translation in spec
 - add perl syntaxe checking on "build" (makefile)

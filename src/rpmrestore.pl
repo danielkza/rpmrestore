@@ -63,12 +63,14 @@ sub touch_fmt($) {
 # and populate a hash of hash
 sub get_rpm_infos($) {
 	my $package = shift(@_);
+
+	# md5 is the last field because it may not exists (directories)
 	my @info =
-`rpm -q --queryformat "[%6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILEMD5S} %{FILENAMES}\n]" $package `;
+`rpm -q --queryformat "[%6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILENAMES} %{FILEMD5S}\n]" $package `;
 
 	my %h;
 	foreach my $elem (@info) {
-		my ( $mode, $user, $group, $mtime, $size, $md5, $name ) = split ' ',
+		my ( $mode, $user, $group, $mtime, $size, $name, $md5 ) = split ' ',
 		  $elem;
 		my %h2 = (
 			mode  => $mode,
@@ -444,7 +446,7 @@ sub change_time($$) {
 ###############################################################################
 #                             main
 ###############################################################################
-my $Version = '0.9';
+my $Version = '1.1';
 
 $| = 1;
 
