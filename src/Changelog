@@ -1,3 +1,12 @@
+2007-03-20 Eric Gerbier <gerbier@users.sourceforge.net> 1.2
+	* rc file is now loaded in order : host, home, local
+	* change debug system (no more global var)
+	* apply some Conway coding rules
+	* fix a localisation problem
+	* split code in smaller subroutines
+	* improved documentation
+	* remove global variables
+
 2007-01-05 Eric Gerbier <gerbier@users.sourceforge.net> 1.1
 	* fix a bug for directories
 
