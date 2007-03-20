@@ -24,7 +24,7 @@ use English qw(-no_match_vars);
 
 use Getopt::Long;    # arg analysis
 use Pod::Usage;      # man page
-use POSIX qw(strftime locale_h);
+use POSIX qw(strftime);
 use Digest::MD5;
 use File::stat;
 
@@ -561,10 +561,6 @@ sub change_time($$) {
 my $version = '1.2';
 
 $OUTPUT_AUTOFLUSH = 1;
-
-# to avoid localisation problem
-# with rpm output (work ?)
-setlocale( LC_CTYPE, 'POSIX' );
 
 my $opt_verbose = 0;
 my $opt_help;
