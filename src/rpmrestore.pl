@@ -110,6 +110,7 @@ sub get_rpm_infos($) {
 	foreach my $elem (@info) {
 		my ( $mode, $user, $group, $mtime, $size, $name, $md5 ) =
 		  split /$space/, $elem;
+		chomp $md5;
 		my %h2 = (
 			mode  => $mode,
 			user  => $user,
@@ -163,7 +164,7 @@ sub ask($$$$$$$) {
 		add_change();
 	}
 	else {
-		debug('dryrun mode : mo changes');
+		debug('dryrun mode : no changes');
 	}
 	return;
 }
@@ -755,7 +756,7 @@ CHANGE: foreach my $elem (@check) {
 	# note : this is a special case of split call, like awk
 	my ( $change, $config, $filename ) = split /\s+/, $elem;
 
-	if ( $config ne 'c' ) {
+	if ( !$filename ) {
 		$filename = $config;
 	}
 	if ($opt_file) {
