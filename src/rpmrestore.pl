@@ -20,144 +20,191 @@
 use strict;
 use warnings;
 
+use English qw(-no_match_vars);
+
 use Getopt::Long;    # arg analysis
 use Pod::Usage;      # man page
-use POSIX qw(strftime);
+use POSIX qw(strftime locale_h);
 use Digest::MD5;
 use File::stat;
 
 use Data::Dumper;    # debug
 
 my $fh_log;          # file handle to log file
-my $opt_verbose;
 
-my $nb_change_made = 0;
-
-# whe should use only this sub, and no print
 ###############################################################################
-sub debug($) {
-	my $text = shift(@_);
-	print "debug $text\n" if ($opt_verbose);
+{
+
+	# to avoid a global variable
+	my $nb_change_made = 0;
+
+	# is called at end of operations to display some stats
+	sub get_nb_change_made() {
+		return $nb_change_made;
+	}
+
+	# is used in ask subroutine to count changes
+	sub add_change() {
+		$nb_change_made++;
+		return;
+	}
+}
+
+# whe should use only this subroutines, and no direct call to print
+###############################################################################
+# change debug subroutine by pointing to other anonymous sub
+# this way seems better than previous one as
+# - it does not need any "global" verbose variable
+# - it suppress any verbose test (quicker)
+sub init_debug($) {
+	my $verbose = shift @_;
+
+	# to avoid error messages
+	no warnings 'redefine';
+
+	if ($verbose) {
+		*debug = sub { my $text = $_[0]; print "debug $text\n"; };
+	}
+	else {
+		*debug = sub { };
+	}
+
+	use warnings 'all';
 	return;
 }
 ###############################################################################
+# display a warning message
 sub warning($) {
-	my $text = shift(@_);
+	my $text = shift @_;
 	warn "WARNING $text\n";
 	return;
 }
 ###############################################################################
+# display a "normal" message
 sub info($) {
-	my $text = shift(@_);
+	my $text = shift @_;
 	print "$text\n";
 	return;
 }
 ###############################################################################
+# input : time format
+# output : concatenated date/time
 sub touch_fmt($) {
-	my $time_fmt = shift(@_);
+	my $time_fmt = shift @_;
 
-	return strftime "%Y%m%d%H%M%S", localtime($time_fmt);
+	return strftime '%Y%m%d%H%M%S', localtime $time_fmt;
 }
 ###############################################################################
 # get all info about files from a package
 # and populate a hash of hash
 sub get_rpm_infos($) {
-	my $package = shift(@_);
+	my $package = shift @_;
 
+	# use space as field separator : see below
 	# md5 is the last field because it may not exists (directories)
 	my @info =
 `rpm -q --queryformat "[%6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILENAMES} %{FILEMD5S}\n]" $package `;
 
 	my %h;
+	my $space = q{ };
 	foreach my $elem (@info) {
-		my ( $mode, $user, $group, $mtime, $size, $name, $md5 ) = split ' ',
-		  $elem;
+		my ( $mode, $user, $group, $mtime, $size, $name, $md5 ) =
+		  split /$space/, $elem;
 		my %h2 = (
 			mode  => $mode,
 			user  => $user,
 			group => $group,
 			mtime => $mtime,
 			size  => $size,
-			md5   => $md5
+			md5   => $md5,
 		);
 		$h{$name} = \%h2;
 	}
 	return %h;
 }
 ###############################################################################
+# just print a line on current version
 sub print_version($) {
-	my $version = shift(@_);
+	my $version = shift @_;
 	info("$0 version $version");
 	return;
 }
 ###############################################################################
 # this sub will select interactive/batch/dryrun mode
 sub ask($$$$$$$) {
-	my $opt_dry_run = shift(@_);    # dryrun option
-	my $opt_batch   = shift(@_);    # batch option
-	my $action      = shift(@_);    # sub closure
-	my $filename    = shift(@_);    # file name
-	my $type        = shift(@_);    # parameter name
-	my $orig        = shift(@_);    # original value
-	my $current     = shift(@_);    # current value
+	my $opt_dry_run = shift @_;    # dryrun option
+	my $opt_batch   = shift @_;    # batch option
+	my $action      = shift @_;    # sub closure
+	my $filename    = shift @_;    # file name
+	my $type        = shift @_;    # parameter name
+	my $orig        = shift @_;    # original value
+	my $current     = shift @_;    # current value
 
 	display( $filename, $type, $orig, $current );
 
 	if ( !$opt_dry_run ) {
+
+		# "change" mode
 		if ( !$opt_batch ) {
 
 			# interactive mode
 			# ask to confirm
-			print "want to restore (y/n) ? ";
-			my $rep = <STDIN>;
-			chomp($rep);
+			print 'want to restore (y/n) ? ';
+			my $rep = <>;
+			chomp $rep;
 
 			return unless ( lc($rep) eq 'y' );
 		}
 
-		# apply
-		&$action;
+		# apply changes
+		&{$action};
 		info("change $type on $filename");
 		writelog( $filename, $type, $orig, $current );
-		$nb_change_made++;
+		add_change();
 	}
 	else {
-		debug("dryrun mode : mo changes");
+		debug('dryrun mode : mo changes');
 	}
 	return;
 }
 ###############################################################################
 # just show the differences
 sub display($$$$) {
-	my $filename = shift(@_);    # file name
-	my $param    = shift(@_);    # parameter name
-	my $orig     = shift(@_);    # initial value (rpm)
-	my $current  = shift(@_);    # current value
+	my $filename = shift @_;    # file name
+	my $param    = shift @_;    # parameter name
+	my $orig     = shift @_;    # initial value (rpm)
+	my $current  = shift @_;    # current value
 
 	info("$filename $param orig $orig current $current");
 	return;
 }
 ###############################################################################
 # write on log file for rollback
+# this is also read by rollback subroutine
 sub writelog($$$$) {
-	my $filename = shift(@_);
-	my $param    = shift(@_);
-	my $orig     = shift(@_);
-	my $current  = shift(@_);
+	my $filename = shift @_;
+	my $param    = shift @_;
+	my $orig     = shift @_;
+	my $current  = shift @_;
 
-	print $fh_log "$filename $param from $current to $orig\n" if ($fh_log);
+	print {$fh_log} "$filename $param from $current to $orig\n" if ($fh_log);
 	return;
 }
 ###############################################################################
+# file info are numeric in a computer
+# but human prefer another print
+# we also print the 2 forms
+# raw_val is numeric
+# human_val is decoded
 sub set_val($$) {
-	my $raw_val   = shift(@_);
-	my $human_val = shift(@_);
+	my $raw_val   = shift @_;
+	my $human_val = shift @_;
 
 	return "$raw_val ($human_val)";
 }
 ###############################################################################
 sub get_val($) {
-	my $val = shift(@_);
+	my $val = shift @_;
 
 	if ( $val =~ m/^(\d+) \(([^)])/ ) {
 		my $raw_val   = $1;
@@ -169,24 +216,187 @@ sub get_val($) {
 	}
 }
 ###############################################################################
-# use log file to revert change
-sub rollback($$$$$$$) {
-	my $log        = shift(@_);
-	my $opt_batch  = shift(@_);
-	my $opt_dryrun = shift(@_);
-	my $opt_user   = shift(@_);
-	my $opt_group  = shift(@_);
-	my $opt_mode   = shift(@_);
-	my $opt_time   = shift(@_);
+sub rollback_user($$$$$$$) {
+	my $opt_batch  = shift @_;
+	my $opt_dryrun = shift @_;
+	my $fic        = shift @_;
+	my $line       = shift @_;
+	my $to         = shift @_;
+	my $from       = shift @_;
+	my $cur_stat   = shift @_;
 
-	my $fh_roll;
-	open( $fh_roll, '<', $log ) or die "can not open rollback file $log : $!\n";
+	my $nb_rollback = 0;
+
+	my ( $to_uid, $to_user ) = get_val($to);
+
+	# check log format
+	if ( defined $to_uid ) {
+
+		# check if current value is same than $to
+
+		my $cur_uid = $cur_stat->uid();
+		if ( $cur_uid != $to_uid ) {
+			warning(
+"current uid $cur_uid does not match rollback value : $to_uid (line $line)"
+			);
+		}
+		else {
+			my ( $from_uid, $from_user ) = get_val($from);
+
+			# check log format
+			if ( defined $from_uid ) {
+				my $action = sub { change_user( $from_uid, $fic ); };
+				ask( $opt_dryrun, $opt_batch, $action, $fic, 'user', $from,
+					$to );
+				$nb_rollback = 1;
+			}
+			else {
+				warning("bad log format for 'from' field : $from (line $line)");
+			}
+		}
+	}
+	else {
+		warning("bad log format for 'to' field : $to (line $line)");
+	}
+	return $nb_rollback;
+}
+###############################################################################
+sub rollback_group($$$$$$$) {
+	my $opt_batch  = shift @_;
+	my $opt_dryrun = shift @_;
+	my $fic        = shift @_;
+	my $line       = shift @_;
+	my $to         = shift @_;
+	my $from       = shift @_;
+	my $cur_stat   = shift @_;
+
+	my $nb_rollback = 0;
+	my ( $to_gid, $to_group ) = get_val($to);
+
+	# check log format
+	if ( defined $to_gid ) {
+
+		# check if current value is same than $to
+
+		my $cur_gid = $cur_stat->gid();
+		if ( $cur_gid != $to_gid ) {
+			warning(
+"current gid $cur_gid does not match rollback value : $to_gid (line $line)"
+			);
+		}
+		else {
+			my ( $from_gid, $from_group ) = get_val($from);
+
+			# check log format
+			if ( defined $from_gid ) {
+				my $action = sub { change_group( $from_gid, $fic ); };
+				ask( $opt_dryrun, $opt_batch, $action, $fic, 'group', $from,
+					$to );
+				$nb_rollback++;
+			}
+			else {
+				warning("bad log format for 'from' field : $from (line $line)");
+			}
+		}
+	}
+	else {
+		warning("bad log format for 'to' field : $to (line $line)");
+	}
+
+	return $nb_rollback;
+}
+###############################################################################
+sub rollback_mode($$$$$$$) {
+	my $opt_batch  = shift @_;
+	my $opt_dryrun = shift @_;
+	my $fic        = shift @_;
+	my $line       = shift @_;
+	my $to         = shift @_;
+	my $from       = shift @_;
+	my $cur_stat   = shift @_;
+
+	my $nb_rollback = 0;
+	my $cur_mode    = $cur_stat->mode();
+
+	my $to_mode = $to;
+	if ( $to_mode != $cur_mode ) {
+		warning(
+"current mode $cur_mode does not match rollback value : $to_mode (line $line)"
+		);
+	}
+	else {
+		my $action = sub { change_mode( $from, $fic ); };
+		ask( $opt_dryrun, $opt_batch, $action, $fic, 'mode', $from, $to );
+		$nb_rollback++;
+	}
+
+	return $nb_rollback;
+}
+###############################################################################
+sub rollback_time($$$$$$$) {
+	my $opt_batch  = shift @_;
+	my $opt_dryrun = shift @_;
+	my $fic        = shift @_;
+	my $line       = shift @_;
+	my $to         = shift @_;
+	my $from       = shift @_;
+	my $cur_stat   = shift @_;
+
+	my $nb_rollback = 0;
+	my ( $to_epoch, $to_mtime ) = get_val($to);
+
+	# check log format
+	if ( defined $to_epoch ) {
+
+		# check if current value is same than $to
+
+		my $cur_epoch = $cur_stat->mtime();
+		if ( $cur_epoch != $to_epoch ) {
+			warning(
+"current mtime $cur_epoch does not match rollback value : $to_epoch (line $line)"
+			);
+		}
+		else {
+			my ( $from_epoch, $from_mtime ) = get_val($from);
+
+			# check log format
+			if ( defined $from_epoch ) {
+				my $action = sub { change_time( $from_epoch, $fic ); };
+				ask( $opt_dryrun, $opt_batch, $action, $fic, 'mtime', $from,
+					$to );
+				$nb_rollback = 1;
+			}
+			else {
+				warning("bad log format for 'from' field : $from (line $line)");
+			}
+		}
+	}
+	else {
+		warning("bad log format for 'to' field : $to (line $line)");
+	}
+
+	return $nb_rollback;
+}
+###############################################################################
+# use log file to revert change
+# it looks very similar to main code
+sub rollback($$$$$$$) {
+	my $log        = shift @_;
+	my $opt_batch  = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_user   = shift @_;
+	my $opt_group  = shift @_;
+	my $opt_mode   = shift @_;
+	my $opt_time   = shift @_;
+
+	open( my $fh_roll, '<', $log )
+	  or die "can not open rollback file $log : $!\n";
 
 	info("rollaback from $log");
 
 	my $line        = 0;
 	my $nb_rollback = 0;
-	while (<$fh_roll>) {
+  ROLLBACK: while (<$fh_roll>) {
 		$line++;
 		chomp;
 		if (m/^(\S+) (\w+) from (.*) to (.*)/) {
@@ -198,149 +408,42 @@ sub rollback($$$$$$$) {
 
 			if ( !-e $fic ) {
 				warning("file $fic is missing");
-				next;
+				next ROLLBACK;
 			}
 
 			# get current values
 			# to check if current value is equal to $to ?
-			my $cur_stat = stat($fic);
+			my $cur_stat = stat $fic;
 
 			# param will be restored to $from
 
 			if ( $param eq 'user' ) {
 				if ($opt_user) {
-					my ( $to_uid, $to_user ) = get_val($to);
-
-					# check log format
-					if ( defined $to_uid ) {
-
-						# check if current value is same than $to
-
-						my $cur_uid = $cur_stat->uid();
-						if ( $cur_uid != $to_uid ) {
-							warning(
-"current uid $cur_uid does not match rollback value : $to_uid (line $line)"
-							);
-						}
-						else {
-							my ( $from_uid, $from_user ) = get_val($from);
-
-							# check log format
-							if ( defined $from_uid ) {
-								my $action =
-								  sub { change_user( $from_uid, $fic ); };
-								ask( $opt_dryrun, $opt_batch, $action, $fic,
-									'user', $from, $to );
-								$nb_rollback++;
-							}
-							else {
-								warning(
-"bad log format for 'from' field : $from (line $line)"
-								);
-							}
-						}
-					}
-					else {
-						warning(
-							"bad log format for 'to' field : $to (line $line)");
-					}
+					$nb_rollback +=
+					  rollback_user( $opt_batch, $opt_dryrun, $fic, $line, $to,
+						$from, $cur_stat );
 				}
 			}
 			elsif ( $param eq 'group' ) {
 				if ($opt_group) {
-					my ( $to_gid, $to_group ) = get_val($to);
-
-					# check log format
-					if ( defined $to_gid ) {
-
-						# check if current value is same than $to
-
-						my $cur_gid = $cur_stat->gid();
-						if ( $cur_gid != $to_gid ) {
-							warning(
-"current gid $cur_gid does not match rollback value : $to_gid (line $line)"
-							);
-						}
-						else {
-							my ( $from_gid, $from_group ) = get_val($from);
-
-							# check log format
-							if ( defined $from_gid ) {
-								my $action =
-								  sub { change_group( $from_gid, $fic ); };
-								ask( $opt_dryrun, $opt_batch, $action, $fic,
-									'group', $from, $to );
-								$nb_rollback++;
-							}
-							else {
-								warning(
-"bad log format for 'from' field : $from (line $line)"
-								);
-							}
-						}
-					}
-					else {
-						warning(
-							"bad log format for 'to' field : $to (line $line)");
-					}
+					$nb_rollback +=
+					  rollback_group( $opt_batch, $opt_dryrun, $fic, $line, $to,
+						$from, $cur_stat );
 				}
 			}
 			elsif ( $param eq 'mtime' ) {
 				if ($opt_time) {
-					my ( $to_epoch, $to_mtime ) = get_val($to);
-
-					# check log format
-					if ( defined $to_epoch ) {
-
-						# check if current value is same than $to
-
-						my $cur_epoch = $cur_stat->mtime();
-						if ( $cur_epoch != $to_epoch ) {
-							warning(
-"current mtime $cur_epoch does not match rollback value : $to_epoch (line $line)"
-							);
-						}
-						else {
-							my ( $from_epoch, $from_mtime ) = get_val($from);
-
-							# check log format
-							if ( defined $from_epoch ) {
-								my $action =
-								  sub { change_time( $from_epoch, $fic ); };
-								ask( $opt_dryrun, $opt_batch, $action, $fic,
-									'mtime', $from, $to );
-								$nb_rollback++;
-							}
-							else {
-								warning(
-"bad log format for 'from' field : $from (line $line)"
-								);
-							}
-						}
-					}
-					else {
-						warning(
-							"bad log format for 'to' field : $to (line $line)");
-					}
+					$nb_rollback +=
+					  rollback_time( $opt_batch, $opt_dryrun, $fic, $line, $to,
+						$from, $cur_stat );
 				}
 			}
 			elsif ( $param eq 'mode' ) {
 				if ($opt_mode) {
+					$nb_rollback +=
+					  rollback_mode( $opt_batch, $opt_dryrun, $fic, $line, $to,
+						$from, $cur_stat );
 
-					my $cur_mode = $cur_stat->mode();
-
-					my $to_mode = $to;
-					if ( $to_mode != $cur_mode ) {
-						warning(
-"current mode $cur_mode does not match rollback value : $to_mode (line $line)"
-						);
-					}
-					else {
-						my $action = sub { change_mode( $from, $fic ); };
-						ask( $opt_dryrun, $opt_batch, $action, $fic, 'mode',
-							$from, $to );
-						$nb_rollback++;
-					}
 				}
 			}
 			else {
@@ -355,89 +458,98 @@ sub rollback($$$$$$$) {
 
 	# stats
 	info "rollback $nb_rollback attributes";
-	info("$nb_change_made changes applied");
+	info( get_nb_change_made() . ' changes applied' );
 
 	return;
 }
-###############################################################################
-# read rc file
+################################################################################
+# read all existing rc file from general to local :
+# host, home, local directory
 sub readrc($) {
 
-	my $rh_list = shift(@_);    # list of available parameters
+	my $rh_list = shift @_;    # list of available parameters
 
-	my $rcfile = $ENV{HOME} . '/.rpmrestorerc';
+	# can use local rc file, home rc file, host rc file
+	my @list_rc =
+	  ( '/etc/rpmrestorerc', $ENV{HOME} . '/.rpmrestorerc', '.rpmrestorerc', );
 
-	if ( -f $rcfile ) {
-		my $fh_rc;
-		if ( open( $fh_rc, '<', $rcfile ) ) {
+	foreach my $rcfile (@list_rc) {
 
-			# perl cookbook, 8.16
-			my $line = 1;
-			while (<$fh_rc>) {
-				chomp;
-				s/#.*//;        # comments
-				s/^\s+//;       # skip spaces
-				s/\s+$//;
-				next unless length;
-				my ( $key, $value ) = split( /\s*=\s*/, $_, 2 );
-				if ( defined $key ) {
-					if ( exists $rh_list->{$key} ) {
-						${ $rh_list->{$key} } = $value;
-						debug(
-							"rcfile : found $key parameter with $value value");
+		if ( -f $rcfile ) {
+
+			if ( open( my $fh_rc, '<', $rcfile ) ) {
+
+				# perl cookbook, 8.16
+				my $line = 1;
+			  RC: while (<$fh_rc>) {
+					chomp;
+					s/#.*//;     # comments
+					s/^\s+//;    # skip spaces
+					s/\s+$//;
+					next RC unless length;
+					my ( $key, $value ) = split /\s*=\s*/, $_, 2;
+					if ( defined $key ) {
+						if ( exists $rh_list->{$key} ) {
+							${ $rh_list->{$key} } = $value;
+							init_debug($value) if ( $key eq 'verbose' );
+							debug(
+"rcfile : found $key parameter with $value value"
+							);
+						}
+						else {
+							warning(
+"bad $key parameter in line $line in $rcfile file"
+							);
+						}
 					}
 					else {
-						warning(
-							"bad $key parameter in line $line in $rcfile file");
+						warning("bad line $line in $rcfile file");
 					}
+					$line++;
 				}
-				else {
-					warning("bad line $line in $rcfile file");
-				}
-				$line++;
+				close $fh_rc;
 			}
-			close($fh_rc);
+			else {
+				warning("can not open rcfile $rcfile : $!");
+			}
 		}
 		else {
-			warning("can not open rcfile $rcfile : $!");
+			debug("no rcfile $rcfile found");
 		}
-	}
-	else {
-		debug("no rcfile $rcfile found");
 	}
 	return;
 }
 ###############################################################################
 sub change_user($$) {
-	my $new_uid  = shift(@_);
-	my $filename = shift(@_);
+	my $new_uid  = shift @_;
+	my $filename = shift @_;
 
 	chown $new_uid, -1, $filename;
 	return;
 }
 ###############################################################################
 sub change_group($$) {
-	my $new_gid  = shift(@_);
-	my $filename = shift(@_);
+	my $new_gid  = shift @_;
+	my $filename = shift @_;
 
 	chown -1, $new_gid, $filename;
 	return;
 }
 ###############################################################################
 sub change_mode($$) {
-	my $new_mode = shift(@_);
-	my $filename = shift(@_);
+	my $new_mode = shift @_;
+	my $filename = shift @_;
 
 	chmod oct($new_mode), $filename;
 	return;
 }
 ###############################################################################
 sub change_time($$) {
-	my $new_time = shift(@_);
-	my $filename = shift(@_);
+	my $new_time = shift @_;
+	my $filename = shift @_;
 
 	# use utime to rewrite in full perl
-	my $st    = stat($filename);
+	my $st    = stat $filename;
 	my $atime = $st->atime();
 
 	utime $atime, $new_time, ($filename);
@@ -446,10 +558,15 @@ sub change_time($$) {
 ###############################################################################
 #                             main
 ###############################################################################
-my $Version = '1.1';
+my $version = '1.2';
 
-$| = 1;
+$OUTPUT_AUTOFLUSH = 1;
 
+# to avoid localisation problem
+# with rpm output (work ?)
+setlocale( LC_CTYPE, 'POSIX' );
+
+my $opt_verbose = 0;
 my $opt_help;
 my $opt_man;
 my $opt_version;
@@ -477,7 +594,6 @@ my %opt = (
 	'verbose'  => \$opt_verbose,
 	'file'     => \$opt_file,
 	'package'  => \$opt_package,
-	'verbose'  => \$opt_verbose,
 	'version'  => \$opt_version,
 	'batch'    => \$opt_batch,
 	'dry-run'  => \$opt_dryrun,
@@ -489,8 +605,11 @@ my %opt = (
 	'size'     => \$opt_flag_size,
 	'md5'      => \$opt_flag_md5,
 	'log'      => \$opt_log,
-	'rollback' => \$opt_rollback
+	'rollback' => \$opt_rollback,
 );
+
+# set debug before any code
+init_debug($opt_verbose);
 
 # get options from optionnal rcfile
 readrc( \%opt );
@@ -504,6 +623,9 @@ GetOptions(
 	'log=s',     'rollback=s',
 ) or pod2usage(2);
 
+# set debug from argument line
+init_debug($opt_verbose);
+
 if ($opt_help) {
 	pod2usage(1);
 }
@@ -511,7 +633,7 @@ elsif ($opt_man) {
 	pod2usage( -verbose => 2 );
 }
 elsif ($opt_version) {
-	print_version($Version);
+	print_version($version);
 	exit;
 }
 
@@ -538,8 +660,8 @@ if ($opt_flag_all) {
 }
 
 # test for superuser
-if ( ( !$opt_dryrun ) and ( $> != 0 ) ) {
-	warning("do not run on superuser : forced to dry-run");
+if ( ( !$opt_dryrun ) and ( $EFFECTIVE_USER_ID != 0 ) ) {
+	warning('do not run on superuser : forced to dry-run');
 	$opt_dryrun = 1;
 }
 
@@ -586,7 +708,7 @@ if ($opt_file) {
 	   # localisation will prevent to test for keyword as :
 	   #if ( $opt_package =~ m/is not owned by any package/) {
 	   # so another way is : a good answer is only one package, so only one word
-		my @rep = split( /\s/, $opt_package );
+		my @rep = split /\s/, $opt_package;
 		if ( scalar(@rep) == 1 ) {
 			info("package is $opt_package");
 		}
@@ -605,18 +727,19 @@ if ( !$opt_package ) {
 
 # check if package exists
 debug("test if package $opt_package exists");
-system("rpm -q $opt_package > /dev/null");
-if ( $? != 0 ) {
+system "rpm -q $opt_package > /dev/null";
+if ( $CHILD_ERROR != 0 ) {
 	pod2usage("$opt_package : package does not exists");
 }
 
-# check
-my @check = `rpm -V $opt_package`;
+# LC_ALL is set to POSIX by setlocale at top of program
+# to avoid any localisation problem with test in CHANGE loop
+my @check = `export LC_ALL=POSIX; rpm -V $opt_package`;
 
-#print Dumper(@check);
+print Dumper(@check) if ($opt_verbose);
 
 if ( !@check ) {
-	info('0 changes detected');
+	info('0 changes detected : exit');
 	exit;
 }
 my %infos = get_rpm_infos($opt_package);
@@ -629,36 +752,32 @@ my %infos = get_rpm_infos($opt_package);
 # M mode
 
 my $nb_changes = 0;
-foreach my $elem (@check) {
-	next if ( $elem =~ m/^missing/ );
-	next if ( $elem =~ m/^Unsatisfied/ );
+CHANGE: foreach my $elem (@check) {
+	next CHANGE if ( $elem =~ m/^missing/ );
+	next CHANGE if ( $elem =~ m/^Unsatisfied/ );
 
-	my ( $change, $config, $filename ) = split( ' ', $elem );
+	# note : this is a special case of split call, like awk
+	my ( $change, $config, $filename ) = split /\s+/, $elem;
 
 	if ( $config ne 'c' ) {
 		$filename = $config;
 	}
 	if ($opt_file) {
-		next if ( $filename ne $opt_file );
+		next CHANGE if ( $filename ne $opt_file );
 	}
 	debug("change=$change filename=$filename");
 
 	# get current info
-	my $cur_stat = stat($filename);
-
-	#	my (
-	#		$dev,  $ino,   $mode,  $nlink, $uid,     $gid, $rdev,
-	#		$size, $atime, $mtime, $ctime, $blksize, $blocks
-	#	) = stat($filename);
+	my $cur_stat = stat $filename;
 
 	# rpm info
 	my $rpm_info = $infos{$filename};
 
 	if ( ($opt_flag_user) and ( $change =~ m/U/ ) ) {
 		my $rpm_user = $rpm_info->{user};
-		my $rpm_uid  = getpwnam($rpm_user);
+		my $rpm_uid  = getpwnam $rpm_user;
 		my $uid      = $cur_stat->uid();
-		my $user     = getpwuid($uid);
+		my $user     = getpwuid $uid;
 
 		my $action = sub { change_user( $rpm_uid, $filename ); };
 		ask(
@@ -670,9 +789,9 @@ foreach my $elem (@check) {
 	}
 	if ( ($opt_flag_group) and ( $change =~ m/G/ ) ) {
 		my $rpm_group = $rpm_info->{group};
-		my $rpm_gid   = getgrnam($rpm_group);
+		my $rpm_gid   = getgrnam $rpm_group;
 		my $gid       = $cur_stat->gid();
-		my $group     = getgrgid($gid);
+		my $group     = getgrgid $gid;
 
 		my $action = sub { change_group( $rpm_gid, $filename ); };
 		ask(
@@ -698,7 +817,7 @@ foreach my $elem (@check) {
 	}
 	if ( ($opt_flag_mode) and ( $change =~ m/M/ ) ) {
 		my $rpm_mode = $rpm_info->{mode};
-		my $h_mode = sprintf "%lo", $cur_stat->mode();
+		my $h_mode = sprintf '%lo', $cur_stat->mode();
 
 		my $action = sub { change_mode( $rpm_mode, $filename ); };
 		ask( $opt_dryrun, $opt_batch, $action, $filename, 'mode', $rpm_mode,
@@ -720,16 +839,15 @@ foreach my $elem (@check) {
 
 		my $ctx = Digest::MD5->new;
 
-		my $fh_fic;
 		my $cur_md5;
-		if ( open( $fh_fic, '<', $filename ) ) {
+		if ( open( my $fh_fic, '<', $filename ) ) {
 			$ctx->addfile($fh_fic);
 			$cur_md5 = $ctx->hexdigest();
-			close($fh_fic);
+			close $fh_fic;
 		}
 		else {
 			warning("can not open $filename for md5 : $!");
-			$cur_md5 = '';
+			$cur_md5 = q{};
 		}
 
 		display( $filename, 'md5', $rpm_md5, $cur_md5 );
@@ -738,17 +856,17 @@ foreach my $elem (@check) {
 		$nb_changes++;
 	}
 }
-close($fh_log) if ($opt_log);
+close $fh_log if ($opt_log);
 
 # stats
 info("$nb_changes changes detected");
-info("$nb_change_made changes applied");
+info( get_nb_change_made() . ' changes applied' );
 
 __END__
 
 =head1 NAME
 
-rpmrestore - restore attributes from rpm database
+rpmrestore.pl - restore attributes from rpm database
 
 =head1 DESCRIPTION
 
@@ -896,9 +1014,17 @@ batch rollback user changes from /tmp/log
 
 rpmrestore.pl -batch -user -rollback /tmp/log
 
-=head1 FILES
+=head1 CONFIGURATION
 
-the program can read an rcfile (~/.rpmrestorerc)  if it exists.
+the program can read rcfile if some exists.
+it will load in order 
+
+/etc/rpmrestorerc
+
+~/.rpmrestorerc
+
+.rpmrestorerc
+
 In this file, 
 
 # are comments, 
@@ -920,12 +1046,42 @@ you should be superuser to restore attributes, other users can only check change
 
 on batch mode, we recommend to use log file
 
+=head1 DIAGNOSTICS
+
+(to be filled)
+
+=head1 EXIT STATUS
+
+the program should allways exit with code 0
+
+=head1 DEPENDENCIES
+
+this program uses "standard" perl modules (distributed with perl core) : 
+POSIX
+Digest::MD5
+English
+Getopt::Long
+Pod::Usage
+POSIX
+Digest::MD5
+File::stat
+Data::Dumper
+
+=head1 INCOMPATIBILITIES
+
+none is known
+
+=head1 BUGS AND LIMITATIONS
+
+this program can revert changes on user, group, time, properties,
+but not on size and md5 : it can only show the differences
+
 =head1 SEE ALSO
 
 =for man
 \fIrpm\fR\|(1) for rpm call
 
-=head1 COPYRIGHT
+=head1 LICENSE AND COPYRIGHT
 
 Copyright (C) 2006 by Eric Gerbier
 This program is free software; you can redistribute it and/or modify
@@ -933,7 +1089,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
-=head1 AUTHORS
+=head1 AUTHOR
 
 Eric Gerbier
 
