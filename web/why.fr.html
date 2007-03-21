@@ -1,63 +1,73 @@
-<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <META name="generator" content=
-    "HTML Tidy for Linux/x86 (vers 1 September 2005), see www.w3.org">
+    
     <title>pourquoi rpmrestore</title>
-    <META http-equiv="Content-Type" content=
-    "text/html; charset=us-ascii">
-    <meta name="Author" content="Gerbier">
-    <meta name="generator" content="vim">
-    <link rev="made" href="mailto:gerbier@users.sourceforge.net">
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="Author" content="Gerbier" />
+    <meta name="generator" content="vim" />
+    <link rev="made" href="mailto:gerbier@users.sourceforge.net" />
+    <link rel="stylesheet" type="text/css" href="project.css" />
+    
   </head>
+  
   <body>
-    <h1 align="center">Pourquoi ce logiciel</h1>
-    J'en ai eu besoin, je n'ai rien trouv&eacute; sur la toile, alors
-    je l'ai &eacute;crit ...<br>
-    en fait la commande rpm fournit un embryon d'outils, mais
-    remarquablement peu verbeux :
-    <h2>v&eacute;rification</h2>
-    la commande rpm est <code>rpm -V</code>, mais elle ne montre pas
-    les diff&eacute;rences :<br>
-    <em>rpm -V rpm<br>
-      .....UG. c /var/lib/rpm/Basenames<br>
-      .....UG. c /var/lib/rpm/Conflictname<br>
-      .....UG. c /var/lib/rpm/Dirnames<br>
-      .....UG. c /var/lib/rpm/Filemd5s<br>
-      .....UG. c /var/lib/rpm/Group<br>
-      .....UG. c /var/lib/rpm/Installtid<br>
-      .....UG. c /var/lib/rpm/Name<br>
-      .....UG. c /var/lib/rpm/Packages<br>
-      .....UG. c /var/lib/rpm/Providename<br>
-      .....UG. c /var/lib/rpm/Provideversion<br>
-      .....UG. c /var/lib/rpm/Requirename<br>
-      .....UG. c /var/lib/rpm/Requireversion<br>
-      .....UG. c /var/lib/rpm/Sha1header<br>
-      .....UG. c /var/lib/rpm/Sigmd5<br>
-    .....UG. c /var/lib/rpm/Triggername<br></em><br>
-    <em>rpmrestore.pl -u -n -p rpm<br>
-      /var/lib/rpm/Basenames user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Conflictname user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Dirnames user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Filemd5s user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Group user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Installtid user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Name user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Packages user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Providename user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Provideversion user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Requirename user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Requireversion user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Sha1header user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Sigmd5 user orig 37 (rpm) current 0 (root)<br>
-      /var/lib/rpm/Triggername user orig 37 (rpm) current 0
-    (root)<br></em>
+    <h1>Pourquoi ce logiciel</h1>
+    
+    <div>
+      J'en ai eu besoin, je n'ai rien trouvé sur la toile, alors je l'ai écrit
+      ...<br />
+      en fait la commande rpm fournit un embryon d'outils, mais remarquablement peu verbeux :
+    </div>
+    
+    <h2>vérification</h2>
+    
+    <div>
+      la commande rpm est <code>rpm -V</code>, mais elle ne montre pas les différences :<br />
+      <em>rpm -V rpm<br />
+	.....UG. c /var/lib/rpm/Basenames<br />
+	.....UG. c /var/lib/rpm/Conflictname<br />
+	.....UG. c /var/lib/rpm/Dirnames<br />
+	.....UG. c /var/lib/rpm/Filemd5s<br />
+	.....UG. c /var/lib/rpm/Group<br />
+	.....UG. c /var/lib/rpm/Installtid<br />
+	.....UG. c /var/lib/rpm/Name<br />
+	.....UG. c /var/lib/rpm/Packages<br />
+	.....UG. c /var/lib/rpm/Providename<br />
+	.....UG. c /var/lib/rpm/Provideversion<br />
+	.....UG. c /var/lib/rpm/Requirename<br />
+	.....UG. c /var/lib/rpm/Requireversion<br />
+	.....UG. c /var/lib/rpm/Sha1header<br />
+	.....UG. c /var/lib/rpm/Sigmd5<br />
+      .....UG. c /var/lib/rpm/Triggername<br /></em><br />
+      <em>rpmrestore.pl -u -n -p rpm<br />
+	/var/lib/rpm/Basenames user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Conflictname user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Dirnames user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Filemd5s user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Group user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Installtid user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Name user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Packages user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Providename user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Provideversion user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Requirename user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Requireversion user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Sha1header user orig 37 (rpm) current 0 (root)<br />
+	/var/lib/rpm/Sigmd5 user orig 37 (rpm) current 0 (root)<br />
+      /var/lib/rpm/Triggername user orig 37 (rpm) current 0 (root)<br /></em>
+    </div>
+    
     <h2>modification</h2>
-    la commande rpm est <code>rpm --setugids/--setperms</code> : tout
-    o&ugrave; rien !<br>
-    rpmrestore a un mode interactif, un syst&egrave;me de log/rollback.
-    Example : <code>rpmrestore -u -p rpm -l log</code>
-    <hr>
-    <a href="main.fr.html">retour &agrave; la page principale</a>
+    
+    <div>
+      la commande rpm est <code>rpm --setugids/--setperms</code> : tout où rien !<br />
+      rpmrestore a un mode interactif, un système de log/rollback. Example : <code>rpmrestore -u -p rpm -l log</code>
+      <hr />
+      <a href="main.fr.html">retour à la page principale</a>
+    </div>
   </body>
 </html>

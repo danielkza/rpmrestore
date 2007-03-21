@@ -1,106 +1,122 @@
-<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <META name="generator" content=
-    "HTML Tidy for Linux/x86 (vers 1 September 2005), see www.w3.org">
+    
     <title>changelog de rpmrestore</title>
-    <META http-equiv="Content-Type" content=
-    "text/html; charset=us-ascii">
-    <meta name="Author" content="Gerbier">
-    <meta name="generator" content="vim">
-    <link rev="made" href="mailto:gerbier@users.sourceforge.net">
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="Author" content="Gerbier" />
+    <meta name="generator" content="vim" />
+    <link rev="made" href="mailto:gerbier@users.sourceforge.net" />
+    <link rel="stylesheet" type="text/css" href="project.css" />
   </head>
   <body>
-    <h1 align="center">CHANGELOG</h1>
-    <!-- AS-TOC_BEGIN{ -->
-    <h2 align="left">Table des mati&egrave;res</h2>
-    <ul>
-      <li><a href="#v1.2">1.2</a></li>
-      <li><a href="#v1.1">1.1</a></li>
-      <li><a href="#v1.0">1.0</a></li>
-      <li><a href="#v0.9">0.9</a></li>
-      <li><a href="#v0.8">0.8</a></li>
-      <li><a href="#v0.3">0.3</a></li>
-      <li><a href="#v0.2">0.2</a></li>
-      <li><a href="#v0.1">0.1</a></li>
-    </ul>
-    <hr>
-    <!-- AS-TOC_END} -->
-    2007-03-20 Eric Gerbier  &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt; <a name="v1.2">1.2</a>
-<ul>
-  <li>utilisation de 3 niveaux de fichier de configuration : host, home, local</li>
-  <li>refonte du systeme de debugage (suppression des test et de la variable globale)</li>
-  <li>application des règles de codage de Damian Conway</li>
-  <li>résolution d'un problème de localisation</li>
-  <li>découpage du code en blocs plus petits</li>
-  <li>amélioration de la documentation</li>
-  <li>suppression des variables globales</li>
-</ul>
-
-    2007-01-05 Eric Gerbier &lt;<A href=
-"mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-<a name="v1.1" id="v1.1">1.1</a>
-<ul>
-  <li>correction d'un bug sur la gestion des repertoires</li>
-</ul>
-2006-12-07 Eric Gerbier &lt;<A href=
-"mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-<a name="v1.0" id="v1.0">1.0</a>
-<ul>
-  <li>ajout de la traduction fran&ccedil;aise dans le fichier spec
-  (rpm)</li>
-  <li>verification de syntaxe des scripts perl lors de la
-  construction (makefile)</li>
-</ul>
-2006-11-15 Eric Gerbier &lt;<A href=
-"mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-<a name="v0.9" id="v0.9">0.9</a>
-<ul>
-  <li>ajout de test et de diagnostics (si le package existe, si le
-  fichier existe ...)</li>
-  <li>ajout d'infos suplementaires(compteurs)</li>
-  <li>ajout d'un script de test de regression du logiciel
-  (test_rpmrestore.pl)</li>
-</ul>
-2006-11-08 Eric Gerbier &lt;<A href=
-"mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-<a name="v0.8" id="v0.8">0.8</a>
-<ul>
-  <li>ajout de documentation sur tous les attributs</li>
-  <li>on peut utiliser un fichier de configuration (rcfile) pour
-  stocker ses preferences</li>
-  <li>recodage de l'option rollback pour utiliser les m&ecirc;mes
-  options qu'en mode "normal" (batch, dryrun, choix des
-  attributes)</li>
-  <li>le nouveau defaut est de travailler sur l'ensembles des
-  attributs</li>
-  <li>les options de choix des attributs peuvent desormais &ecirc;tre
-  negatives (deselection)</li>
-  <li>le fichier log est ouvert en mode ajout s'il existe
-  dej&agrave;</li>
-  <li>suppression de l'appel au programme externe "touch"</li>
-</ul>
-2006-10-26 Eric Gerbier &lt;<A href=
-"mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-<a name="v0.3" id="v0.3">0.3</a>
-<ul>
-  <li>ajout de l'attribut md5 (mode comparaison seulement)</li>
-  <li>ajout des fonctions debug et warning</li>
-</ul>
-2006-10-10 Eric Gerbier &lt;<A href=
-"mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-<a name="v0.2" id="v0.2">0.2</a>
-<ul>
-  <li>test si l'on est super-utilisateur et force le mode dry-run
-  sinon</li>
-</ul>
-2006-09-13 Eric Gerbier &lt;<A href=
-"mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-<a name="v0.1" id="v0.1">0.1</a>
-<ul>
-  <li>premi&egrave;re version publique</li>
-</ul>
-<hr>
-<a href="main.fr.html">retour &agrave; la page principale</a>
-</body>
+    <h1>CHANGELOG</h1><!-- AS-TOC_BEGIN{ -->
+    <div>
+      
+      <h2>Table des matières</h2>
+      
+      <ul>
+	<li><a href="#v1.2">1.2</a></li>
+	
+	<li><a href="#v1.1">1.1</a></li>
+	
+	<li><a href="#v1.0">1.0</a></li>
+	
+	<li><a href="#v0.9">0.9</a></li>
+	
+	<li><a href="#v0.8">0.8</a></li>
+	
+	<li><a href="#v0.3">0.3</a></li>
+	
+	<li><a href="#v0.2">0.2</a></li>
+	
+	<li><a href="#v0.1">0.1</a></li>
+      </ul>
+      <hr />
+      <!-- AS-TOC_END} -->
+      2007-03-20 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v1.2" id="v1.2">1.2</a>
+      
+      <ul>
+	<li>utilisation de 3 niveaux de fichier de configuration : host, home, local</li>
+	
+	<li>refonte du systeme de debugage (suppression des test et de la variable globale)</li>
+	
+	<li>application des règles de codage de Damian Conway</li>
+	
+	<li>résolution d'un problème de localisation</li>
+	
+	<li>découpage du code en blocs plus petits</li>
+	
+	<li>amélioration de la documentation</li>
+	
+	<li>suppression des variables globales</li>
+	
+	<li>suppression d'un saut de ligne intempestif sur le champ md5</li>
+	
+	<li>correction de bug sur l'analyse de la commande "rpm -V"</li>
+      </ul>2007-01-05 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v1.1" id="v1.1">1.1</a>
+      
+      <ul>
+	<li>correction d'un bug sur la gestion des repertoires</li>
+      </ul>2006-12-07 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v1.0" id="v1.0">1.0</a>
+      
+      <ul>
+	<li>ajout de la traduction française dans le fichier spec (rpm)</li>
+	
+	<li>verification de syntaxe des scripts perl lors de la construction (makefile)</li>
+      </ul>2006-11-15 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.9" id="v0.9">0.9</a>
+      
+      <ul>
+	<li>ajout de test et de diagnostics (si le package existe, si le fichier existe ...)</li>
+	
+	<li>ajout d'infos suplementaires(compteurs)</li>
+	
+	<li>ajout d'un script de test de regression du logiciel (test_rpmrestore.pl)</li>
+      </ul>2006-11-08 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.8" id="v0.8">0.8</a>
+      
+      <ul>
+	<li>ajout de documentation sur tous les attributs</li>
+	
+	<li>on peut utiliser un fichier de configuration (rcfile) pour stocker ses preferences</li>
+	
+	<li>recodage de l'option rollback pour utiliser les mêmes options qu'en mode "normal" (batch, dryrun, choix des
+	attributes)</li>
+	
+	<li>le nouveau defaut est de travailler sur l'ensembles des attributs</li>
+	
+	<li>les options de choix des attributs peuvent desormais être negatives (deselection)</li>
+	
+	<li>le fichier log est ouvert en mode ajout s'il existe dejà</li>
+	
+	<li>suppression de l'appel au programme externe "touch"</li>
+      </ul>2006-10-26 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.3" id="v0.3">0.3</a>
+      
+      <ul>
+	<li>ajout de l'attribut md5 (mode comparaison seulement)</li>
+	
+	<li>ajout des fonctions debug et warning</li>
+      </ul>2006-10-10 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.2" id="v0.2">0.2</a>
+      
+      <ul>
+	<li>test si l'on est super-utilisateur et force le mode dry-run sinon</li>
+      </ul>2006-09-13 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.1" id="v0.1">0.1</a>
+      
+      <ul>
+	<li>première version publique</li>
+      </ul>
+      <hr />
+      <a href="main.fr.html">retour à la page principale</a>
+    </div>
+  </body>
 </html>

@@ -1,44 +1,57 @@
-<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <META name="generator" content=
-    "HTML Tidy for Linux/x86 (vers 1 September 2005), see www.w3.org">
+    
     <title>installation de rpmrestore</title>
-    <META http-equiv="Content-Type" content=
-    "text/html; charset=us-ascii">
-    <meta name="Author" content="Gerbier">
-    <meta name="generator" content="vim">
-    <link rev="made" href="mailto:gerbier@users.sourceforge.net">
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="Author" content="Gerbier" />
+    <meta name="generator" content="vim" />
+    <link rev="made" href="mailto:gerbier@users.sourceforge.net" />
+    <link rel="stylesheet" type="text/css" href="project.css" />
+    
   </head>
+  
   <body>
-    <h1 align="center">installation</h1>
-    <h2>dependances</h2>
-    <ul>
-      <li>perl</li>
-      <li>rpm</li>
-    </ul>
-    <hr>
-    <h2>package rpm</h2>
-    Comme le logiciel travaille sur les rpm, il est naturellement
-    fourni sous ce format. Le package ne d&eacute;pends donc pas de
-    l'os (type : noarch).<br>
-    l'installation se fait par la commande <code>rpm -Uvh
-    rpmrestore*.noarch.rpm</code>
-    <hr>
-    <h2>tar.gz</h2>
-    pour les besoins &eacute;ventuels (?) de d&eacute;pannage, le code
-    est &eacute;galement fourni au format tar.gz.<br>
-    L'installation se fait par :
-    <ol>
-      <li><code>tar xvfz rpmrestore-{version}.tar.gz</code></li>
-      <li><code>cd rpmrestore*</code></li>
-      <li><code>make</code></li>
-      <li><code>make install</code></li>
-    </ol>
-    <br>
-    ps : la commande <code>rpmbuild -tb rpmrestore*.tar.gz</code>
-    permet de fabriquer un package rpm &agrave; partir du tar.gz
-    <hr>
-    <a href="main.fr.html">retour &agrave; la page principale</a>
+    <h1>installation</h1>
+    
+    <div>
+      
+      <h2>dependances</h2>
+      
+      <ul>
+	<li>perl</li>
+	
+	<li>rpm</li>
+      </ul>
+      <hr />
+      
+      <h2>package rpm</h2>
+      
+      Comme le logiciel travaille sur les rpm, il est naturellement fourni sous ce format. Le package
+      ne dépends donc pas de l'os (type : noarch).<br />
+      l'installation se fait par la commande <code>rpm -Uvh rpmrestore*.noarch.rpm</code>
+      <hr />
+      
+      <h2>tar.gz</h2>
+      
+      pour les besoins éventuels (?) de dépannage, le code est également fourni au format tar.gz.<br />
+      L'installation se fait par :
+      
+      <ol>
+	<li><code>tar xvfz rpmrestore-{version}.tar.gz</code></li>
+	
+	<li><code>cd rpmrestore*</code></li>
+	
+	<li><code>make</code></li>
+	
+	<li><code>make install</code></li>
+      </ol><br />
+      ps : la commande <code>rpmbuild -tb rpmrestore*.tar.gz</code> permet de fabriquer un package rpm à partir du tar.gz
+      <hr />
+      <a href="main.fr.html">retour à la page principale</a>
+    </div>
   </body>
 </html>
