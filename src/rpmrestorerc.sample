@@ -1,5 +1,15 @@
 # rc file exemple for rpmrestore
-# should be copied on your home directory in .rpmrestorerc file
+# $Id:$
+# it can be used as 
+# - host (general) configuration file as /etc/rpmrestorerc
+# - home (user) configuration file as ~/.rpmrestorerc
+# - local configuration file as ./.rpmrestorerc
+# 
+# the program will read them all in order from host to local
+#
+# syntaxe :
+# - all line beginning with "#" are comments
+# - all parameter have the same name as command line arguments, without dash
 
 # no verbose mode
 verbose = 0
