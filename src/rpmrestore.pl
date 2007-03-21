@@ -750,10 +750,17 @@ my %infos = get_rpm_infos($opt_package);
 
 my $nb_changes = 0;
 CHANGE: foreach my $elem (@check) {
+
+	# this search depends upon localisation
 	next CHANGE if ( $elem =~ m/^missing/ );
 	next CHANGE if ( $elem =~ m/^Unsatisfied/ );
 
-	# note : this is a special case of split call, like awk
+   # rpm -V output can have 2 or 3 fields :
+   # S.?....T c /etc/afick.conf
+   # missing  c /etc/logrotate.d/afick
+   # S.5....T   /usr/bin/afick.pl
+   # S.5....T g /var/lib/afick/archive
+   # ? is get when rpmrestore does not have any perm to the file (user not root)
 	my ( $change, $config, $filename ) = split /\s+/, $elem;
 
 	if ( !$filename ) {
