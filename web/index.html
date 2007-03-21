@@ -1,23 +1,145 @@
-<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
-<html>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <META name="generator" content=
-    "HTML Tidy for Linux/x86 (vers 1 September 2005), see www.w3.org">
-    <META http-equiv="Content-Type" content=
-    "text/html; charset=us-ascii">
-    <meta name="Author" content="Gerbier">
-    <meta name="Keywords" content="security,integrity">
+    
     <title>rpmrestore</title>
-    <link rev="made" href="mailto:gerbier@users.sourceforge.net">
-    <base target="Content">
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="Author" content="Gerbier" />
+    <link rev="made" href="mailto:gerbier@users.sourceforge.net" />
+    <link rel="stylesheet" type="text/css" href="project.css" />
   </head>
-  <frameset cols="20%,*">
-    <frame name="Menu" src="menu.html" title="Menu" id="Menu">
-    <frame name="Content" src="main.html" title="Content" id="Content">
-    <noframes>
-      <body>
-	<a href="main.html">main page</a>
-      </body>
-    </noframes>
-  </frameset>
+  <body>
+    <div class="header">
+      <table width="100%" summary="header">
+	<tr>
+	  <td valign="top" align="left"><a href="http://sourceforge.net/projects/rpmrestore">Project Page</a></td>
+	  
+	  <td align="center">
+	    <h1>RPMRESTORE</h1>
+	  </td>
+	  
+	  <td valign="top" align="right"><a href="mailto:gerbier@users.sourceforge.net">Feedback..</a></td>
+	</tr>
+      </table>
+    </div>
+    
+    
+    <div class="sidebar">
+      <h2>Language</h2>
+      <ul>
+	<li><a href="index.fr.html"><img alt="francais" src="lang_french.gif" width="40" height="25" /></a></li>
+	<li><a href= "index.html"><img alt="anglaise" src="lang_english.gif" width="40" height="25" /></a></li>
+      </ul> 
+      
+      <h2>About</h2>
+      
+      <ul>
+	<li><a href="index.html">introduction</a></li>
+	<li><a href="why.html">why to use it ?</a></li>
+	<li><a href="support.html">support</a></li>
+      </ul>
+      
+      <h2>Get it</h2>
+      
+      <ul>
+	<li><a href="http://sourceforge.net/project/showfiles.php?group_id=178177">rpmrestore</a></li>
+	<li><a href="http://sourceforge.net/svn/?group_id=178177">svn version</a></li>
+      </ul>
+      
+      <h2>Changes</h2>
+      
+      <ul>
+	<li><a href="news.html">news</a></li>
+	<li><a href="changelog.html">changelog</a></li>
+	<li><a href="todo.html">todo</a></li>
+      </ul>
+      
+      <h2>Documentation for use</h2>
+      
+      <ul>
+	<li><a href="install.html">installation</a></li>
+	<li><a href="upgrade.html">upgrade</a></li>
+	<li><a href="rpmrestore.1.html">command line manual</a></li>
+      </ul>
+      
+      <h2>Resources</h2>
+      
+      <ul>
+	<li><a href="http://sourceforge.net/projects/rpmrestore/">SourceForge main page</a></li>
+	<li><a href="http://sourceforge.net/svn/?group_id=178177">subversion</a></li>
+      </ul>
+      
+      <h2>My others projects</h2>
+      
+      <ul>
+	<li><a href="http://afick.sourceforge.net">afick</a></li>
+	<li><a href="http://projinfo.sourceforge.net">project information recuperator</a></li>
+	<li><a href="http://rpmorphan.sourceforge.net">rpmorphan</a></li>
+	<li><a href="http://rpmrebuild.sourceforge.net">rpmrebuild</a></li>
+	<li><a href="http://webminstats.sourceforge.net">webminstats</a></li>
+      </ul>
+    </div>
+    
+    <div class="main">
+      Rpmrestore allows the user to show the differences (user, group, mode, mtime, size) between a package's status on
+      install and its current status. This act as an improvement of the functionality provied by the "rpm -V"
+      command.<br />
+      It also allows the user to restore the attributes to their original state (install state). It features a batch mode,
+      an interactive mode, a logfile, and rollback.
+      <hr />
+      
+      <table summary="content">
+	<tr>
+	  <th>Licence</th>
+	</tr>
+	
+	<tr>
+	  <td>open-source software on</td>
+	  <td><a href="http://www.gnu.org/copyleft/gpl.html">Gnu General Public Licence</a></td>
+	</tr>
+	
+	<tr>
+	  <th>Logiciels</th>
+	</tr>
+	
+	<tr>
+	  <td>status</td>
+	  <td>version</td>
+	  <td>date</td>
+	</tr>
+	
+	<tr>
+	  <td>stable</td>
+	  <td>1.2</td>
+	  <td>2007-03-20</td>
+	</tr>
+	
+	<tr>
+	  <td>developpement</td>
+	  <td>-</td>
+	  <td>-</td>
+	</tr>
+	
+	<tr>
+	  <th>Author</th>
+	</tr>
+	
+	<tr>
+	  <td><a href="mailto:gerbier@users.sourceforge.net">Eric Gerbier</a></td>
+	  <td><a href="mailto:gerbier@users.sourceforge.net"><img alt="Eric Gerbier" src="mail.jpg" width="48" height="48" /></a></td>
+	</tr>
+      </table>
+      <hr />
+      page changed on 2007-03-20<br />
+      thanks to <a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=178177" width="88" height="31" alt="SourceForge Logo" /></a> to host me
+      <p>
+	<a href="http://validator.w3.org/check?uri=referer">
+	  <img src="http://www.w3.org/Icons/valid-xhtml10"
+	alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a>
+      </p>
+    </div>
+  </body>
 </html>

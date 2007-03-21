@@ -1,24 +1,147 @@
-<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
-<html>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <META name="generator" content=
-    "HTML Tidy for Linux/x86 (vers 1 September 2005), see www.w3.org">
-    <META http-equiv="Content-Type" content=
-    "text/html; charset=us-ascii">
-    <meta name="Author" content="Gerbier">
-    <meta name="Keywords" content="security,integrity">
-    <title>projet rpmrestore</title>
-    <link rev="made" href="mailto:gerbier@users.sourceforge.net">
-    <base target="Content">
+    
+    <title>rpmrestore</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="Author" content="Gerbier" />
+    <link rev="made" href="mailto:gerbier@users.sourceforge.net" />
+    <link rel="stylesheet" type="text/css" href="project.css" />
   </head>
-  <frameset cols="20%,*">
-    <frame name="Menu" src="menu.fr.html" title="Menu" id="Menu">
-    <FRAME name="Content" src="main.fr.html" title="Content" id=
-    "Content">
-    <noframes>
-      <body>
-	<a href="main.fr.html">page principale</a>
-      </body>
-    </noframes>
-  </frameset>
+  <body>
+    <div class="header">
+      <table width="100%" summary="entete">
+	<tr>
+	  <td valign="top" align="left"><a href="http://sourceforge.net/projects/rpmrestore">page du projet</a></td>
+	  
+	  <td align="center">
+	    <h1>RPMRESTORE</h1>
+	  </td>
+	  
+	  <td valign="top" align="right"><a href="mailto:gerbier@users.sourceforge.net">Donnez votre avis</a></td>
+	</tr>
+      </table>
+    </div>
+    
+    
+    <div class="sidebar">
+      <h2>Language</h2>
+      <ul>
+	<li><a href="index.fr.html"><img alt="francais" src="lang_french.gif" width="40" height="25" /></a></li>
+	<li><a href= "index.html"><img alt="anglaise" src="lang_english.gif" width="40" height="25" /></a></li>
+      </ul> 
+      
+      <h2>A propos</h2>
+      
+      <ul>
+	<li><a href="index.fr.html">introduction</a></li>
+	<li><a href="why.fr.html">pourquoi l'utiliser</a></li>
+	<li><a href="support.fr.html">support</a></li>
+      </ul>
+      
+      <h2>Téléchargement</h2>
+      
+      <ul>
+	<li><a href="http://sourceforge.net/project/showfiles.php?group_id=178177">rpmrestore</a></li>
+	<li><a href="https://sourceforge.net/svn/?group_id=178177">version svn</a></li>
+      </ul>
+      
+      <h2>Modifications</h2>
+      
+      <ul>
+	<li><a href="news.fr.html">news</a></li>
+	<li><a href="changelog.fr.html">changelog</a></li>
+	<li><a href="todo.fr.html">ce qu'il reste a faire</a></li>
+      </ul>
+      
+      <h2>Documentation d'utilisation</h2>
+      
+      <ul>
+	<li><a href="install.fr.html">installation</a></li>
+	<li><a href="upgrade.fr.html">mise a jour</a></li>
+	<li><a href="rpmrestore.1.html">manuel de la ligne de commande</a></li>
+      </ul>
+      
+      <h2>Resources</h2>
+      
+      <ul>
+	<li><a href="http://sourceforge.net/projects/rpmrestore/">SourceForge main page</a></li>
+	<li><a href="http://sourceforge.net/svn/?group_id=178177">subversion</a></li>
+      </ul>
+      
+      <h2>Mes Autres projets</h2>
+      
+      <ul>
+	<li><a href="http://afick.sourceforge.net/index.fr.html">afick</a></li>
+	<li><a href="http://projinfo.sourceforge.net/index.fr.html">project information recuperator</a></li>
+	<li><a href="http://rpmorphan.sourceforge.net/index.fr.html">rpmorphan</a></li>
+	<li><a href="http://rpmrebuild.sourceforge.net/index.fr.html">rpmrebuild</a></li>
+	<li><a href="http://webminstats.sourceforge.net/index.fr.html">webminstats</a></li>
+      </ul>
+    </div>
+    
+    <div class="main">
+      Rpmrestore est un outil permettant de visualiser les différences (propriétaire, groupe, permissions, date de
+      modification, taille) entre un package tel qu'il a été installé et tel qu'il est (c'est pour cela une version
+      améliorée de rpm -V).<br />
+      Il permet aussi de restaurer ces attributs dans leur état original (d'installation).
+      <hr />
+      
+      <table summary="contenu">
+	<tr>
+	  <th>Licence</th>
+	</tr>
+	
+	<tr>
+	  <td>logiciels libre sous licence</td>
+	  <td><a href="http://www.gnu.org/copyleft/gpl.html">gpl</a></td>
+	  <td>(Gnu General Public Licence)</td>
+	</tr>
+	
+	<tr>
+	  <th>Logiciels</th>
+	</tr>
+	
+	<tr>
+	  <td>status</td>
+	  <td>version</td>
+	  <td>date</td>
+	</tr>
+	
+	<tr>
+	  <td>stable</td>
+	  <td>1.2</td>
+	  <td>2007-03-20</td>
+	</tr>
+	
+	<tr>
+	  <td>developpement</td>
+	  <td>-</td>
+	  <td>-</td>
+	</tr>
+	
+	<tr>
+	  <th>Auteur</th>
+	</tr>
+	
+	<tr>
+	  <td><a href="mailto:gerbier@users.sourceforge.net">Eric Gerbier</a></td>
+	  <td><a href="mailto:gerbier@users.sourceforge.net"><img alt="Eric Gerbier" src="mail.jpg" width="48" height= "48" /></a></td>
+	</tr>
+      </table>
+      <hr />
+      Le site est en cours de traduction en français.<br />
+      <hr />
+      page modifiée le 2007-03-20<br />
+      merci à <a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=178177" width="88" height="31" alt="SourceForge Logo" /></a> pour son hébergement
+      <p>
+	<a href="http://validator.w3.org/check?uri=referer">
+	  <img src="http://www.w3.org/Icons/valid-xhtml10"
+	alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a>
+      </p>
+    </div>
+  </body>
 </html>
