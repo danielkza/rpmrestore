@@ -20,7 +20,8 @@ SCRIPTS = $(PACKAGE).pl
 	pod2man $^ > $@
 
 %.1.html : %.pl
-	pod2html --header $^ > $@
+	pod2html --header $^ | sed -f html.sed > $@
+
 
 # default target : build man
 # and check syntaxe
