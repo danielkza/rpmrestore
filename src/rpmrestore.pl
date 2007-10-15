@@ -151,10 +151,10 @@ sub ask($$$$$$$) {
 			# interactive mode
 			# ask to confirm
 			print 'want to restore (y/n) ? ';
-			my $rep = <>;
+			my $rep = lc <>;
 			chomp $rep;
 
-			return unless ( lc($rep) eq 'y' );
+			return unless ( $rep eq 'y' );
 		}
 
 		# apply changes
