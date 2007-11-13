@@ -104,8 +104,10 @@ sub get_rpm_infos($) {
 
 	# use space as field separator : see below
 	# md5 is the last field because it may not exists (directories)
+	## no critic ( ProhibitBacktickOperators );
 	my @info =
 `rpm -q --queryformat "[%6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILENAMES} %{FILEMD5S}\n]" $package `;
+	## use critic;
 
 	my %h;
 	my $space = q{ };
@@ -158,6 +160,7 @@ sub ask($$$$$$$) {
 
 			## no critic ( PostfixControls );
 			return unless ( $rep eq 'y' );
+			## use critic;
 		}
 
 		# apply changes
@@ -395,8 +398,10 @@ sub rollback($$$$$$$) {
 	my $opt_mode   = shift @_;
 	my $opt_time   = shift @_;
 
+	## no critic ( ProhibitParensWithBuiltins );
 	open( my $fh_roll, '<', $log )
 	  or die "can not open rollback file $log : $!\n";
+	## use critic;
 
 	info("rollaback from $log");
 
@@ -423,6 +428,7 @@ sub rollback($$$$$$$) {
 
 			# param will be restored to $from
 
+			## no critic ( ProhibitCascadingIfElse );
 			if ( $param eq 'user' ) {
 				if ($opt_user) {
 					$nb_rollback +=
@@ -455,6 +461,7 @@ sub rollback($$$$$$$) {
 			else {
 				warning("bad parameter $param on line $line : $_");
 			}
+			## use critic;
 		}
 		else {
 			warning("bad log line $line : $_");
@@ -483,7 +490,9 @@ sub readrc($) {
 
 		if ( -f $rcfile ) {
 
+			## no critic ( ProhibitParensWithBuiltins );
 			if ( open( my $fh_rc, '<', $rcfile ) ) {
+				## use critic;
 
 				# perl cookbook, 8.16
 				my $line = 1;
@@ -684,8 +693,10 @@ if ($opt_log) {
 		$open_mode = '>';
 		debug("log on new file $opt_log");
 	}
+	## no critic ( ProhibitParensWithBuiltins );
 	open( $fh_log, $open_mode, $opt_log )
 	  or warning("can not open log file $opt_log : $!");
+	## use critic;
 }
 
 if ($opt_rollback) {
@@ -704,19 +715,23 @@ if ($opt_file) {
 	if ( -e $opt_file ) {
 
 		# get rpm from file
+		## no critic ( ProhibitBacktickOperators );
 		$opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
+		## use critic;
 
 	   # test result
 	   # localisation will prevent to test for keyword as :
 	   #if ( $opt_package =~ m/is not owned by any package/) {
 	   # so another way is : a good answer is only one package, so only one word
 		my @rep = split /\s/, $opt_package;
+		## no critic ( ProhibitParensWithBuiltins );
 		if ( scalar(@rep) == 1 ) {
 			info("package is $opt_package");
 		}
 		else {
 			pod2usage("$opt_package is not owned by any package");
 		}
+		## use critic;
 	}
 	else {
 		pod2usage("can not find $opt_file file");
@@ -737,7 +752,9 @@ if ( $CHILD_ERROR != 0 ) {
 # LC_ALL is set to POSIX
 # to avoid any localisation problem with test in CHANGE loop
 $ENV{'LC_ALL'} = 'POSIX';
+## no critic ( ProhibitBacktickOperators );
 my @check = `rpm -V $opt_package`;
+## use critic;
 
 print Dumper(@check) if ($opt_verbose);
 
@@ -850,6 +867,7 @@ CHANGE: foreach my $elem (@check) {
 		my $ctx = Digest::MD5->new;
 
 		my $cur_md5;
+		## no critic ( ProhibitParensWithBuiltins );
 		if ( open( my $fh_fic, '<', $filename ) ) {
 			$ctx->addfile($fh_fic);
 			$cur_md5 = $ctx->hexdigest();
@@ -859,6 +877,7 @@ CHANGE: foreach my $elem (@check) {
 			warning("can not open $filename for md5 : $!");
 			$cur_md5 = q{};
 		}
+		## use critic;
 
 		display( $filename, 'md5', $rpm_md5, $cur_md5 );
 
