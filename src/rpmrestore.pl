@@ -60,7 +60,9 @@ sub init_debug($) {
 	my $verbose = shift @_;
 
 	# to avoid error messages
+	## no critic ( NoWarnings );
 	no warnings 'redefine';
+	## use critic;
 
 	if ($verbose) {
 		*debug = sub { my $text = $_[0]; print "debug $text\n"; };
@@ -154,6 +156,7 @@ sub ask($$$$$$$) {
 			my $rep = lc <>;
 			chomp $rep;
 
+			## no critic ( PostfixControls );
 			return unless ( $rep eq 'y' );
 		}
 
@@ -188,7 +191,9 @@ sub writelog($$$$) {
 	my $orig     = shift @_;
 	my $current  = shift @_;
 
+	## no critic ( PostfixControls );
 	print {$fh_log} "$filename $param from $current to $orig\n" if ($fh_log);
+	## use critic;
 	return;
 }
 ###############################################################################
@@ -875,8 +880,9 @@ rpmrestore.pl - restore attributes from rpm database
 =head1 DESCRIPTION
 
 The rpm database store user, group, time, mode for all files,
-and offer a command to display the changes between install state (database)
-and current disk state. rpmrestore will help you to restore install attributes
+and offer a command (rpm -V ) to display a summary of the changes between 
+install state (database) and current disk state. 
+Rpmrestore can display detailed changes and can restore install attributes.
 
 =head1 SYNOPSIS
 
