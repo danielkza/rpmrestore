@@ -1,4 +1,4 @@
-%define VERSION 1.2
+%define VERSION 1.3
 # Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
 Summary: rpmrestore restore file attributes from rpm database
 # The Summary: line should be expanded to about here -----^
@@ -66,6 +66,11 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc test_rpmrestore.pl
 
 %changelog
+* Tue Nov 13 2007 Eric Gerbier <gerbier@users.sourceforge.net> 1.3
+- standardize man pages
+- shell independance : can now work with c-shell*
+- remove all perlcritic warnings
+
 * Tue Mar 20 2007 Eric Gerbier <gerbier@users.sourceforge.net> 1.2
 - rc file is now loaded in order : host, home, local
 - change debug system (no more global var)
