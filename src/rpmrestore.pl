@@ -546,7 +546,7 @@ sub change_mode($$) {
 	my $new_mode = shift @_;
 	my $filename = shift @_;
 
-	chmod oct($new_mode), $filename;
+	chmod oct $new_mode, $filename;
 	return;
 }
 ###############################################################################
@@ -734,9 +734,10 @@ if ( $CHILD_ERROR != 0 ) {
 	pod2usage("$opt_package : package does not exists");
 }
 
-# LC_ALL is set to POSIX by setlocale at top of program
+# LC_ALL is set to POSIX
 # to avoid any localisation problem with test in CHANGE loop
-my @check = `export LC_ALL=POSIX; rpm -V $opt_package`;
+$ENV{'LC_ALL'} = 'POSIX';
+my @check = `rpm -V $opt_package`;
 
 print Dumper(@check) if ($opt_verbose);
 
@@ -913,6 +914,28 @@ options:
   -size		apply on size (just display)
   -md5		apply on md5 (just display)
 
+=head1 REQUIRED ARGUMENTS
+
+you should provide a target, to work on
+
+this can be 
+
+=over 8
+
+=item B<-package>
+
+The program works on designed installed rpm package.
+
+=item B<-file>
+
+The program works on designed file, which should be a part from a rpm package.
+
+=item B<-rollback>
+
+The program works from designed log file, and rollback (revert) the changes.
+
+=back
+
 =head1 OPTIONS
 
 =over 8
@@ -990,7 +1013,7 @@ it can not be restored by the program.
 
 =back
 
-=head1 USE
+=head1 USAGE
 
 the rpm command to control changes 
  
