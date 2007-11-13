@@ -1,3 +1,30 @@
+			1.3 version
+			-------------
+incompatibility : none
+bugfix : should now work with c-shell
+new features : none
+----------------------------------------------------------------
+			1.2 version
+			-------------
+incompatibility : none
+bugfix : fix localisation problem
+new features : 
+- rc file is now loaded in order : host, home, local
+- better parsing for "rpm -V" output
+----------------------------------------------------------------
+			1.1 version
+			-------------
+incompatibility : none
+bugfix : fix a bug for directories
+new features : none
+----------------------------------------------------------------
+			1.0 version
+			-------------
+incompatibility :
+bugfix :
+new features :
+- french translation in spec file for rpm
+----------------------------------------------------------------
 			0.9 version
 			-------------
 

@@ -11,7 +11,7 @@
 	* split code in smaller subroutines
 	* improved documentation
 	* remove global variables
-	* remove forgotten lien feed on md5 field
+	* remove forgotten line feed on md5 field
 	* better parsing for "rpm -V" output
 
 2007-01-05 Eric Gerbier <gerbier@users.sourceforge.net> 1.1
