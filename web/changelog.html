@@ -20,105 +20,93 @@
       <h2>Table of Contents</h2>
       
       <ul>
+	<li><a href="#v1.3">1.3</a></li>
 	<li><a href="#v1.2">1.2</a></li>
-	
 	<li><a href="#v1.1">1.1</a></li>
-	
 	<li><a href="#v1.0">1.0</a></li>
-	
 	<li><a href="#v0.9">0.9</a></li>
-	
 	<li><a href="#v0.8">0.8</a></li>
-	
 	<li><a href="#v0.3">0.3</a></li>
-	
 	<li><a href="#v0.2">0.2</a></li>
-	
 	<li><a href="#v0.1">0.1</a></li>
       </ul>
       <hr />
       <!-- AS-TOC_END} -->
+      2007-11-13 Eric Gerbier  &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt; <a name="v1.3">1.3</a>
+      <ul>
+	<li>standardize man pages</li>
+	<li>shell independance : can now work with c-shell*</li>
+	<li>remove all perlcritic warnings</li>
+      </ul>
+      
       2007-03-20 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
       <a name="v1.2" id="v1.2">1.2</a>
-      
       <ul>
 	<li>rc file is now loaded in order : host, home, local</li>
-	
 	<li>change debug system (no more global var)</li>
-	
 	<li>apply some Conway coding rules</li>
-	
 	<li>fix a localisation problem</li>
-	
 	<li>split code in smaller subroutines</li>
-	
 	<li>improved documentation</li>
-	
 	<li>remove global variables</li>
-	
 	<li>remove forgotten lien feed on md5 field</li>
-	
 	<li>better parsing for "rpm -V" output (fix bug)</li>
-      </ul>2007-01-05 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-      <a name="v1.1" id="v1.1">1.1</a>
+      </ul>
       
+      2007-01-05 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v1.1" id="v1.1">1.1</a>
       <ul>
 	<li>fix a bug for directories</li>
-      </ul>2006-12-07 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-      <a name="v1.0" id="v1.0">1.0</a>
+      </ul>
       
+      2006-12-07 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v1.0" id="v1.0">1.0</a>
       <ul>
 	<li>add french translation in spec</li>
-	
 	<li>add perl syntaxe checking on "build" (makefile)</li>
-      </ul>2006-11-15 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-      <a name="v0.9" id="v0.9">0.9</a>
+      </ul>
       
+      2006-11-15 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.9" id="v0.9">0.9</a>
       <ul>
 	<li>add more tests (if package exists, if file exists ...)</li>
-	
 	<li>add more infos</li>
-	
 	<li>add regression tests (test_rpmrestore.pl)</li>
-      </ul>2006-11-08 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-      <a name="v0.8" id="v0.8">0.8</a>
+      </ul>
       
+      2006-11-08 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.8" id="v0.8">0.8</a>
       <ul>
 	<li>add info sub</li>
-	
 	<li>add doc for all attributes</li>
-	
 	<li>can use rcfile</li>
-	
 	<li>recode rollback to use options (batch, dryrun, attributes choice)</li>
-	
 	<li>default behavior is to work on all attributes</li>
-	
 	<li>attributes can now be negative (unselected)</li>
-	
 	<li>append on log file if it exists</li>
-	
 	<li>remove call to external touch program</li>
-      </ul>2006-10-26 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-      <a name="v0.3" id="v0.3">0.3</a>
+      </ul>
       
+      2006-10-26 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.3" id="v0.3">0.3</a>
       <ul>
 	<li>add md5 attribute (compare only)</li>
-	
 	<li>add debug and warning sub</li>
-      </ul>2006-10-10 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
-      <a name="v0.2" id="v0.2">0.2</a>
+      </ul>
       
+      2006-10-10 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
+      <a name="v0.2" id="v0.2">0.2</a>
       <ul>
 	<li>test for superuser account and force dry-run if not</li>
       </ul>
+      
       <hr />
       2006-09-13 Eric Gerbier &lt;<a href="mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a>&gt;
       <a name="v0.1" id="v0.1">0.1</a>
-      
       <ul>
 	<li>initial release</li>
       </ul>
+      
       <hr />
       <a href="index.html">back to main page</a>
     </div>
