@@ -398,10 +398,10 @@ sub rollback($$$$$$$) {
 	my $opt_mode   = shift @_;
 	my $opt_time   = shift @_;
 
-	## no critic ( ProhibitParensWithBuiltins );
-	open( my $fh_roll, '<', $log )
-	  or die "can not open rollback file $log : $!\n";
-	## use critic;
+	my $fh_roll;
+	if ( !open $fh_roll, '<', $log ) {
+		die "can not open rollback file $log : $ERRNO\n";
+	}
 
 	info("rollaback from $log");
 
@@ -467,7 +467,7 @@ sub rollback($$$$$$$) {
 			warning("bad log line $line : $_");
 		}
 	}
-	close $fh_roll;
+	close $fh_roll or warning("can not close $log : $ERRNO");
 
 	# stats
 	info "rollback $nb_rollback attributes";
@@ -539,6 +539,7 @@ sub change_user($$) {
 	my $new_uid  = shift @_;
 	my $filename = shift @_;
 
+	## no critic (ProhibitMagicNumbers)
 	chown $new_uid, -1, $filename;
 	return;
 }
@@ -547,6 +548,7 @@ sub change_group($$) {
 	my $new_gid  = shift @_;
 	my $filename = shift @_;
 
+	## no critic (ProhibitMagicNumbers)
 	chown -1, $new_gid, $filename;
 	return;
 }
@@ -573,7 +575,7 @@ sub change_time($$) {
 ###############################################################################
 #                             main
 ###############################################################################
-my $version = '1.2';
+my $VERSION = '1.4';
 
 $OUTPUT_AUTOFLUSH = 1;
 
@@ -644,7 +646,7 @@ elsif ($opt_man) {
 	pod2usage( -verbose => 2 );
 }
 elsif ($opt_version) {
-	print_version($version);
+	print_version($VERSION);
 	exit;
 }
 
@@ -671,7 +673,7 @@ if ($opt_flag_all) {
 }
 
 # test for superuser
-if ( ( !$opt_dryrun ) and ( $EFFECTIVE_USER_ID != 0 ) ) {
+if ( ( !$opt_dryrun ) && ( $EFFECTIVE_USER_ID != 0 ) ) {
 	warning('do not run on superuser : forced to dry-run');
 	$opt_dryrun = 1;
 }
@@ -693,10 +695,10 @@ if ($opt_log) {
 		$open_mode = '>';
 		debug("log on new file $opt_log");
 	}
-	## no critic ( ProhibitParensWithBuiltins );
-	open( $fh_log, $open_mode, $opt_log )
-	  or warning("can not open log file $opt_log : $!");
-	## use critic;
+	## no critic (RequireBriefOpen)
+	if ( !open $fh_log, $open_mode, $opt_log ) {
+		warning("can not open log file $opt_log : $ERRNO");
+	}
 }
 
 if ($opt_rollback) {
@@ -751,6 +753,7 @@ if ( $CHILD_ERROR != 0 ) {
 
 # LC_ALL is set to POSIX
 # to avoid any localisation problem with test in CHANGE loop
+## no critic (RequireLocalizedPunctuationVars)
 $ENV{'LC_ALL'} = 'POSIX';
 ## no critic ( ProhibitBacktickOperators );
 my @check = `rpm -V $opt_package`;
@@ -867,17 +870,15 @@ CHANGE: foreach my $elem (@check) {
 		my $ctx = Digest::MD5->new;
 
 		my $cur_md5;
-		## no critic ( ProhibitParensWithBuiltins );
-		if ( open( my $fh_fic, '<', $filename ) ) {
+		if ( open my $fh_fic, '<', $filename ) {
 			$ctx->addfile($fh_fic);
 			$cur_md5 = $ctx->hexdigest();
-			close $fh_fic;
+			close $fh_fic or warning("can not close $filename : $ERRNO");
 		}
 		else {
-			warning("can not open $filename for md5 : $!");
+			warning("can not open $filename for md5 : $ERRNO");
 			$cur_md5 = q{};
 		}
-		## use critic;
 
 		display( $filename, 'md5', $rpm_md5, $cur_md5 );
 
@@ -885,7 +886,9 @@ CHANGE: foreach my $elem (@check) {
 		$nb_changes++;
 	}
 }
-close $fh_log if ($opt_log);
+if ($opt_log) {
+	close $fh_log or warning("can not close $opt_log : $ERRNO");
+}
 
 # stats
 info("$nb_changes changes detected");
