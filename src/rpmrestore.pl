@@ -476,6 +476,47 @@ sub rollback($$$$$$$) {
 	return;
 }
 ################################################################################
+# read one rc file
+sub read1rc($$) {
+	my $rh_list = shift @_;    # list of available parameters
+	my $rcfile  = shift @_;
+
+	my $fh_rc;
+	if ( open $fh_rc, '<', $rcfile ) {
+
+		# perl cookbook, 8.16
+		my $line = 1;
+	  RC: while (<$fh_rc>) {
+			chomp;
+			s/#.*//;           # comments
+			s/^\s+//;          # skip spaces
+			s/\s+$//;
+			next RC unless length;
+			my ( $key, $value ) = split /\s*=\s*/, $_, 2;
+			if ( defined $key ) {
+				if ( exists $rh_list->{$key} ) {
+					${ $rh_list->{$key} } = $value;
+					init_debug($value) if ( $key eq 'verbose' );
+					debug( "rcfile : found $key parameter with $value value" );
+				}
+				else {
+					warning(
+						"bad $key parameter in line $line in $rcfile file" );
+				}
+			}
+			else {
+				warning("bad line $line in $rcfile file");
+			}
+			$line++;
+		}
+		close $fh_rc or warning("can not close $rcfile : $ERRNO");
+	}
+	else {
+		warning("can not open rcfile $rcfile : $ERRNO");
+	}
+	return;
+}
+################################################################################
 # read all existing rc file from general to local :
 # host, home, local directory
 sub readrc($) {
@@ -490,43 +531,7 @@ sub readrc($) {
 
 		if ( -f $rcfile ) {
 
-			## no critic ( ProhibitParensWithBuiltins );
-			if ( open( my $fh_rc, '<', $rcfile ) ) {
-				## use critic;
-
-				# perl cookbook, 8.16
-				my $line = 1;
-			  RC: while (<$fh_rc>) {
-					chomp;
-					s/#.*//;     # comments
-					s/^\s+//;    # skip spaces
-					s/\s+$//;
-					next RC unless length;
-					my ( $key, $value ) = split /\s*=\s*/, $_, 2;
-					if ( defined $key ) {
-						if ( exists $rh_list->{$key} ) {
-							${ $rh_list->{$key} } = $value;
-							init_debug($value) if ( $key eq 'verbose' );
-							debug(
-"rcfile : found $key parameter with $value value"
-							);
-						}
-						else {
-							warning(
-"bad $key parameter in line $line in $rcfile file"
-							);
-						}
-					}
-					else {
-						warning("bad line $line in $rcfile file");
-					}
-					$line++;
-				}
-				close $fh_rc;
-			}
-			else {
-				warning("can not open rcfile $rcfile : $!");
-			}
+			read1rc( $rh_list, $rcfile );
 		}
 		else {
 			debug("no rcfile $rcfile found");
