@@ -578,6 +578,133 @@ sub change_time($$) {
 	return;
 }
 ###############################################################################
+sub display_user($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
+
+	my $rpm_user = $rpm_info->{'user'};
+	my $rpm_uid  = getpwnam $rpm_user;
+	my $uid      = $cur_stat->uid();
+	my $user     = getpwuid $uid;
+
+	my $action = sub { change_user( $rpm_uid, $filename ); };
+	ask(
+		$opt_dryrun, $opt_batch, $action, $filename, 'user',
+		set_val( $rpm_uid, $rpm_user ),
+		set_val( $uid,     $user )
+	);
+
+	return;
+}
+###############################################################################
+sub display_group($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
+
+	my $rpm_group = $rpm_info->{'group'};
+	my $rpm_gid   = getgrnam $rpm_group;
+	my $gid       = $cur_stat->gid();
+	my $group     = getgrgid $gid;
+
+	my $action = sub { change_group( $rpm_gid, $filename ); };
+	ask(
+		$opt_dryrun, $opt_batch, $action, $filename, 'group',
+		set_val( $rpm_gid, $rpm_group ),
+		set_val( $gid,     $group )
+	);
+
+	return;
+}
+###############################################################################
+sub display_mode($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
+
+	my $rpm_mode = $rpm_info->{'mode'};
+	my $h_mode = sprintf '%lo', $cur_stat->mode();
+
+	my $action = sub { change_mode( $rpm_mode, $filename ); };
+	ask( $opt_dryrun, $opt_batch, $action, $filename, 'mode', $rpm_mode,
+		$h_mode );
+
+	return;
+}
+###############################################################################
+sub display_size($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
+
+	my $rpm_size = $rpm_info->{'size'};
+	my $size     = $cur_stat->size();
+
+	display( $filename, 'size', $rpm_size, $size );
+
+	# no fix action on this parameter
+	return;
+}
+###############################################################################
+sub display_time($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
+
+	my $rpm_mtime   = $rpm_info->{'mtime'};
+	my $rpm_h_mtime = touch_fmt($rpm_mtime);
+	my $cur_mtime   = $cur_stat->mtime();
+	my $cur_h_mtime = touch_fmt($cur_mtime);
+
+	my $action = sub { change_time( $rpm_mtime, $filename ); };
+	ask(
+		$opt_dryrun, $opt_batch, $action, $filename, 'mtime',
+		set_val( $rpm_mtime, $rpm_h_mtime ),
+		set_val( $cur_mtime, $cur_h_mtime )
+	);
+
+	return;
+}
+###############################################################################
+sub display_checksum($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
+
+	debug('md5');
+	my $rpm_md5 = $rpm_info->{'md5'};
+
+	my $ctx = Digest::MD5->new;
+
+	my $cur_md5;
+	if ( open my $fh_fic, '<', $filename ) {
+		$ctx->addfile($fh_fic);
+		$cur_md5 = $ctx->hexdigest();
+		close $fh_fic or warning("can not close $filename : $ERRNO");
+	}
+	else {
+		warning("can not open $filename for md5 : $ERRNO");
+		$cur_md5 = q{};
+	}
+
+	display( $filename, 'md5', $rpm_md5, $cur_md5 );
+
+	# no fix action on this parameter
+	return;
+}
 #                             main
 ###############################################################################
 my $version = '1.4';
@@ -804,85 +931,33 @@ CHANGE: foreach my $elem (@check) {
 	my $rpm_info = $infos{$filename};
 
 	if ( ($opt_flag_user) and ( $change =~ m/U/ ) ) {
-		my $rpm_user = $rpm_info->{user};
-		my $rpm_uid  = getpwnam $rpm_user;
-		my $uid      = $cur_stat->uid();
-		my $user     = getpwuid $uid;
-
-		my $action = sub { change_user( $rpm_uid, $filename ); };
-		ask(
-			$opt_dryrun, $opt_batch, $action, $filename, 'user',
-			set_val( $rpm_uid, $rpm_user ),
-			set_val( $uid,     $user )
-		);
+		display_user( $rpm_info, $cur_stat, $filename, $opt_dryrun,
+			$opt_batch );
 		$nb_changes++;
 	}
 	if ( ($opt_flag_group) and ( $change =~ m/G/ ) ) {
-		my $rpm_group = $rpm_info->{group};
-		my $rpm_gid   = getgrnam $rpm_group;
-		my $gid       = $cur_stat->gid();
-		my $group     = getgrgid $gid;
-
-		my $action = sub { change_group( $rpm_gid, $filename ); };
-		ask(
-			$opt_dryrun, $opt_batch, $action, $filename, 'group',
-			set_val( $rpm_gid, $rpm_group ),
-			set_val( $gid,     $group )
-		);
+		display_group( $rpm_info, $cur_stat, $filename, $opt_dryrun,
+			$opt_batch );
 		$nb_changes++;
 	}
 	if ( ($opt_flag_time) and ( $change =~ m/T/ ) ) {
-		my $rpm_mtime   = $rpm_info->{mtime};
-		my $rpm_h_mtime = touch_fmt($rpm_mtime);
-		my $cur_mtime   = $cur_stat->mtime();
-		my $cur_h_mtime = touch_fmt($cur_mtime);
-
-		my $action = sub { change_time( $rpm_mtime, $filename ); };
-		ask(
-			$opt_dryrun, $opt_batch, $action, $filename, 'mtime',
-			set_val( $rpm_mtime, $rpm_h_mtime ),
-			set_val( $cur_mtime, $cur_h_mtime )
-		);
+		display_time( $rpm_info, $cur_stat, $filename, $opt_dryrun,
+			$opt_batch );
 		$nb_changes++;
 	}
 	if ( ($opt_flag_mode) and ( $change =~ m/M/ ) ) {
-		my $rpm_mode = $rpm_info->{mode};
-		my $h_mode = sprintf '%lo', $cur_stat->mode();
-
-		my $action = sub { change_mode( $rpm_mode, $filename ); };
-		ask( $opt_dryrun, $opt_batch, $action, $filename, 'mode', $rpm_mode,
-			$h_mode );
+		display_mode( $rpm_info, $cur_stat, $filename, $opt_dryrun,
+			$opt_batch );
 		$nb_changes++;
 	}
 	if ( ($opt_flag_size) and ( $change =~ m/S/ ) ) {
-		my $rpm_size = $rpm_info->{size};
-		my $size     = $cur_stat->size();
-
-		display( $filename, 'size', $rpm_size, $size );
-
-		# no fix action on this parameter
+		display_size( $rpm_info, $cur_stat, $filename, $opt_dryrun,
+			$opt_batch );
 		$nb_changes++;
 	}
 	if ( ($opt_flag_md5) and ( $change =~ m/5/ ) ) {
-		debug('md5');
-		my $rpm_md5 = $rpm_info->{md5};
-
-		my $ctx = Digest::MD5->new;
-
-		my $cur_md5;
-		if ( open my $fh_fic, '<', $filename ) {
-			$ctx->addfile($fh_fic);
-			$cur_md5 = $ctx->hexdigest();
-			close $fh_fic or warning("can not close $filename : $ERRNO");
-		}
-		else {
-			warning("can not open $filename for md5 : $ERRNO");
-			$cur_md5 = q{};
-		}
-
-		display( $filename, 'md5', $rpm_md5, $cur_md5 );
-
-		# no fix action on this parameter
+		display_checksum( $rpm_info, $cur_stat, $filename, $opt_dryrun,
+			$opt_batch );
 		$nb_changes++;
 	}
 }
