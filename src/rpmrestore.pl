@@ -835,26 +835,28 @@ sub init($$) {
 	my $opt_flag_group;
 	my $opt_flag_size;
 	my $opt_flag_md5;
+	my $opt_flag_cap;
 
 	# list of  parameter available in rcfile
 	# and ref to opt variables
-	$r_opt->{'help'}     = \$opt_help;
-	$r_opt->{'man'}      = \$opt_man;
-	$r_opt->{'verbose'}  = \$opt_verbose;
-	$r_opt->{'file'}     = \$opt_file;
-	$r_opt->{'package'}  = \$opt_package;
-	$r_opt->{'version'}  = \$opt_version;
-	$r_opt->{'batch'}    = \$opt_batch;
-	$r_opt->{'dry-run'}  = \$opt_dryrun;
-	$r_opt->{'all'}      = \$opt_flag_all;
-	$r_opt->{'user'}     = \$opt_flag_user;
-	$r_opt->{'group'}    = \$opt_flag_group;
-	$r_opt->{'mode'}     = \$opt_flag_mode;
-	$r_opt->{'time'}     = \$opt_flag_time;
-	$r_opt->{'size'}     = \$opt_flag_size;
-	$r_opt->{'md5'}      = \$opt_flag_md5;
-	$r_opt->{'log'}      = \$opt_log;
-	$r_opt->{'rollback'} = \$opt_rollback;
+	$r_opt->{'help'}       = \$opt_help;
+	$r_opt->{'man'}        = \$opt_man;
+	$r_opt->{'verbose'}    = \$opt_verbose;
+	$r_opt->{'file'}       = \$opt_file;
+	$r_opt->{'package'}    = \$opt_package;
+	$r_opt->{'version'}    = \$opt_version;
+	$r_opt->{'batch'}      = \$opt_batch;
+	$r_opt->{'dry-run'}    = \$opt_dryrun;
+	$r_opt->{'all'}        = \$opt_flag_all;
+	$r_opt->{'user'}       = \$opt_flag_user;
+	$r_opt->{'group'}      = \$opt_flag_group;
+	$r_opt->{'mode'}       = \$opt_flag_mode;
+	$r_opt->{'time'}       = \$opt_flag_time;
+	$r_opt->{'size'}       = \$opt_flag_size;
+	$r_opt->{'md5'}        = \$opt_flag_md5;
+	$r_opt->{'capability'} = \$opt_flag_cap;
+	$r_opt->{'log'}        = \$opt_log;
+	$r_opt->{'rollback'}   = \$opt_rollback;
 
 	# set debug before any code
 	init_debug($opt_verbose);
@@ -864,11 +866,11 @@ sub init($$) {
 
 	Getopt::Long::Configure('no_ignore_case');
 	GetOptions(
-		$r_opt,      'help|?',  'man',       'file=s',
-		'package=s', 'verbose', 'version|V', 'batch',
-		'dry-run|n', 'all',     'user!',     'group!',
-		'mode!',     'time!',   'size!',     'md5!',
-		'log=s',     'rollback=s',
+		$r_opt,        'help|?',  'man',       'file=s',
+		'package=s',   'verbose', 'version|V', 'batch',
+		'dry-run|n',   'all',     'user!',     'group!',
+		'mode!',       'time!',   'size!',     'md5!',
+		'capability!', 'log=s',   'rollback=s',
 	) or pod2usage(2);
 
 	# if set debug from argument line
@@ -891,7 +893,8 @@ sub init($$) {
 		&& ( !defined $opt_flag_mode )
 		&& ( !defined $opt_flag_time )
 		&& ( !defined $opt_flag_size )
-		&& ( !defined $opt_flag_md5 ) )
+		&& ( !defined $opt_flag_md5 )
+		&& ( !defined $opt_flag_cap ) )
 	{
 		$opt_flag_all = 1;
 	}
@@ -905,6 +908,7 @@ sub init($$) {
 		$opt_flag_time  = ( !defined $opt_flag_time )  ? 1 : $opt_flag_time;
 		$opt_flag_size  = ( !defined $opt_flag_size )  ? 1 : $opt_flag_size;
 		$opt_flag_md5   = ( !defined $opt_flag_md5 )   ? 1 : $opt_flag_md5;
+		$opt_flag_cap   = ( !defined $opt_flag_cap )   ? 1 : $opt_flag_cap;
 	}
 
 	# test for superuser
@@ -1149,41 +1153,46 @@ md5 is a checksum (a kind of fingerprint) : if the file content is changed, the 
 A difference on this attribute means the file content was changed. This is a "read-only" attribute : 
 it can not be restored by the program.
 
+=item B<-capability>
+
+capability means for posix capability. This is not available on all linux distributions.
+You can look getcap/setcap man pages for more informations.
+
 =back
 
 =head1 USAGE
 
 the rpm command to control changes 
  
-rpm -V rpm
+  rpm -V rpm
 
 same effect (just display) but more detailed (display values)
 
-rpmrestore.pl -n -package rpm
+  rpmrestore.pl -n -package rpm
 
 interactive change mode, only on time attribute
 
-rpmrestore.pl -time -package rpm
+  rpmrestore.pl -time -package rpm
 
 interactive change mode, on all attributes except time attribute
 
-rpmrestore.pl -all -notime -package rpm
+  rpmrestore.pl -all -notime -package rpm
 
 batch change mode (DANGEROUS) on mode attribute with log file
 
-rpmrestore.pl -batch -package rpm -log /tmp/log
+  rpmrestore.pl -batch -package rpm -log /tmp/log
 
 interactive change of mode attribute on file /etc/motd
 
-rpmrestore.pl -mode -file /etc/motd
+  rpmrestore.pl -mode -file /etc/motd
 
 interactive rollback from /tmp/log
 
-rpmrestore.pl -rollback /tmp/log
+  rpmrestore.pl -rollback /tmp/log
 
 batch rollback user changes from /tmp/log
 
-rpmrestore.pl -batch -user -rollback /tmp/log
+  rpmrestore.pl -batch -user -rollback /tmp/log
 
 =head1 CONFIGURATION
 
