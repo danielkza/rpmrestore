@@ -726,10 +726,11 @@ if ($opt_file) {
 		$opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
 		## use critic;
 
-	   # test result
-	   # localisation will prevent to test for keyword as :
-	   #if ( $opt_package =~ m/is not owned by any package/) {
-	   # so another way is : a good answer is only one package, so only one word
+		# test result
+		# localisation will prevent to test for keyword as :
+		#if ( $opt_package =~ m/is not owned by any package/) {
+		# so another way is : a good answer is only one package,
+		# so only one word
 		my @rep = split /\s/, $opt_package;
 		## no critic ( ProhibitParensWithBuiltins );
 		if ( scalar(@rep) == 1 ) {
@@ -772,13 +773,6 @@ if ( !@check ) {
 }
 my %infos = get_rpm_infos($opt_package);
 
-#print Dumper(%infos);
-# we can act on some changes :
-# U user
-# G group
-# T mtime
-# M mode
-
 my $nb_changes = 0;
 CHANGE: foreach my $elem (@check) {
 
@@ -786,12 +780,13 @@ CHANGE: foreach my $elem (@check) {
 	next CHANGE if ( $elem =~ m/^missing/ );
 	next CHANGE if ( $elem =~ m/^Unsatisfied/ );
 
-   # rpm -V output can have 2 or 3 fields :
-   # S.?....T c /etc/afick.conf
-   # missing  c /etc/logrotate.d/afick
-   # S.5....T   /usr/bin/afick.pl
-   # S.5....T g /var/lib/afick/archive
-   # ? is get when rpmrestore does not have any perm to the file (user not root)
+	# rpm -V output can have 2 or 3 fields :
+	# S.?....T c /etc/afick.conf
+	# missing  c /etc/logrotate.d/afick
+	# S.5....T   /usr/bin/afick.pl
+	# S.5....T g /var/lib/afick/archive
+	# ? is get when rpmrestore does not have any perm
+	# to the file (user not root)
 	my ( $change, $config, $filename ) = split /\s+/, $elem;
 
 	if ( !$filename ) {
