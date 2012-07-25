@@ -99,30 +99,40 @@ sub touch_fmt($) {
 ###############################################################################
 # get all info about files from a package
 # and populate a hash of hash
-sub get_rpm_infos($) {
-	my $package = shift @_;
+sub get_rpm_infos($$) {
+	my $package      = shift @_;
+	my $opt_flag_cap = shift @_;
 
 	# use space as field separator : see below
 	# md5 is the last field because it may not exists (directories)
+	# same for capability
+	my $query_cap = $opt_flag_cap ? "%{CAPABILITY}" : q{};
+
+	my $queryformat =
+
+#  tab   0               1                  2                3               4            5            6          7
+"[%{FILENAMES} %6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILEMD5S} $query_cap\n]";
 	## no critic ( ProhibitBacktickOperators );
-	my @info =
-`rpm -q --queryformat "[%6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILENAMES} %{FILEMD5S}\n]" $package `;
+	my @info = `rpm -q --queryformat $queryformat $package`;
 	## use critic;
 
 	my %h;
 	my $space = q{ };
 	foreach my $elem (@info) {
-		my ( $mode, $user, $group, $mtime, $size, $name, $md5 ) =
-		  split /$space/, $elem;
-		chomp $md5;
-		my %h2 = (
-			mode  => $mode,
-			user  => $user,
-			group => $group,
-			mtime => $mtime,
-			size  => $size,
-			md5   => $md5,
+		chomp $elem;
+		my @tab  = split /$space/, $elem;
+		my $name = $tab[0];
+		my %h2   = (
+			mode  => $tab[1],
+			user  => $tab[2],
+			group => $tab[3],
+			mtime => $tab[4],
+			size  => $tab[5],
+			md5   => $tab[6],
 		);
+		if ($opt_flag_cap) {
+			$h2{capability} = $tab[7];
+		}
 		$h{$name} = \%h2;
 	}
 	return %h;
@@ -829,20 +839,21 @@ sub search_command($) {
 # check if posix capabilities are available
 # - should exists in rpm database
 # - getcap and setcap tools should exists too
-sub check_capability(){
+sub check_capability() {
 
 	my $opt_capability;
 
 	# does capability exists in database ?
 	## no critic ( ProhibitBacktickOperators );
-	my $cmd = 'rpm --querytags';
-	my @output  = `$cmd`;
+	my $cmd    = 'rpm --querytags';
+	my @output = `$cmd`;
 	foreach my $tag (@output) {
-		if ($tag  =~ m /CAPABILITY/) {
+		if ( $tag =~ m /CAPABILITY/ ) {
 			$opt_capability = 1;
 			last;
 		}
 	}
+
 	# it is not necessary to go further
 	return 0 unless $opt_capability;
 
@@ -995,10 +1006,11 @@ $OUTPUT_AUTOFLUSH = 1;
 my %opt;
 init( \%opt, $version );
 
-my $opt_package = ${ $opt{'package'} };
-my $opt_log     = ${ $opt{'log'} };
-my $opt_verbose = ${ $opt{'verbose'} };
-my $opt_file    = ${ $opt{'file'} };
+my $opt_package  = ${ $opt{'package'} };
+my $opt_log      = ${ $opt{'log'} };
+my $opt_verbose  = ${ $opt{'verbose'} };
+my $opt_file     = ${ $opt{'file'} };
+my $opt_flag_cap = ${ $opt{'capability'} };
 
 # check if package exists
 debug("test if package $opt_package exists");
@@ -1021,7 +1033,7 @@ if ( !@check ) {
 	info('0 changes detected : exit');
 	exit;
 }
-my %infos = get_rpm_infos($opt_package);
+my %infos = get_rpm_infos( $opt_package, $opt_flag_cap );
 
 my $nb_changes = 0;
 CHANGE: foreach my $elem (@check) {
