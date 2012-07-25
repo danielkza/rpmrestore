@@ -398,6 +398,7 @@ sub rollback($$$$$$$) {
 	my $opt_mode   = shift @_;
 	my $opt_time   = shift @_;
 
+	## no critic (RequireBriefOpen)
 	my $fh_roll;
 	if ( !open $fh_roll, '<', $log ) {
 		die "can not open rollback file $log : $ERRNO\n";
@@ -497,11 +498,10 @@ sub read1rc($$) {
 				if ( exists $rh_list->{$key} ) {
 					${ $rh_list->{$key} } = $value;
 					init_debug($value) if ( $key eq 'verbose' );
-					debug( "rcfile : found $key parameter with $value value" );
+					debug("rcfile : found $key parameter with $value value");
 				}
 				else {
-					warning(
-						"bad $key parameter in line $line in $rcfile file" );
+					warning("bad $key parameter in line $line in $rcfile file");
 				}
 			}
 			else {
@@ -580,7 +580,7 @@ sub change_time($$) {
 ###############################################################################
 #                             main
 ###############################################################################
-my $VERSION = '1.4';
+my $version = '1.4';
 
 $OUTPUT_AUTOFLUSH = 1;
 
@@ -651,7 +651,7 @@ elsif ($opt_man) {
 	pod2usage( -verbose => 2 );
 }
 elsif ($opt_version) {
-	print_version($VERSION);
+	print_version($version);
 	exit;
 }
 
