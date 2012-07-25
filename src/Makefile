@@ -110,7 +110,7 @@ rpm : dist
 # clean temp files
 clean : unexpand
 	rm -f $(MANPAGES1)
-	rm -f $(PACKAGE)-$(VERSION).tar.gz
+	rm -f $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION).tar.gz.sig
 	rm -f pod2*
 	rm -f *.html
 
