@@ -706,6 +706,62 @@ sub display_checksum($$$$$) {
 	return;
 }
 ###############################################################################
+sub open_log($) {
+	my $opt_log = shift @_;
+
+	# open log file
+	my $open_mode;
+	if ( -f $opt_log ) {
+		$open_mode = '>>';
+		info("log on existing file $opt_log");
+	}
+	else {
+		$open_mode = '>';
+		debug("log on new file $opt_log");
+	}
+	## no critic (RequireBriefOpen)
+	if ( !open $fh_log, $open_mode, $opt_log ) {
+		warning("can not open log file $opt_log : $ERRNO");
+	}
+
+	return;
+}
+###############################################################################
+sub check_file($) {
+	my $opt_file = shift @_;
+
+	# check if file exists
+	if ( -e $opt_file ) {
+
+		# get rpm from file
+		## no critic ( ProhibitBacktickOperators );
+		my $opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
+		## use critic;
+
+		# test result
+		# localisation will prevent to test for keyword as :
+		#if ( $opt_package =~ m/is not owned by any package/) {
+		# so another way is : a good answer is only one package,
+		# so only one word
+		my @rep = split /\s/, $opt_package;
+		## no critic ( ProhibitParensWithBuiltins );
+		if ( scalar(@rep) == 1 ) {
+			info("package is $opt_package");
+		}
+		else {
+			pod2usage("$opt_package is not owned by any package");
+		}
+		## use critic;
+
+		return $opt_package;
+	}
+	else {
+		pod2usage("can not find $opt_file file");
+	}
+
+	return;
+}
+###############################################################################
 sub trait_elem($$$$) {
 	my $r_opt    = shift @_;
 	my $r_infos  = shift @_;
@@ -868,21 +924,7 @@ if ($opt_verbose) {
 }
 
 if ($opt_log) {
-
-	# open log file
-	my $open_mode;
-	if ( -f $opt_log ) {
-		$open_mode = '>>';
-		info("log on existing file $opt_log");
-	}
-	else {
-		$open_mode = '>';
-		debug("log on new file $opt_log");
-	}
-	## no critic (RequireBriefOpen)
-	if ( !open $fh_log, $open_mode, $opt_log ) {
-		warning("can not open log file $opt_log : $ERRNO");
-	}
+	open_log($opt_log);
 }
 
 if ($opt_rollback) {
@@ -896,33 +938,7 @@ if ($opt_rollback) {
 }
 
 if ($opt_file) {
-
-	# check if file exists
-	if ( -e $opt_file ) {
-
-		# get rpm from file
-		## no critic ( ProhibitBacktickOperators );
-		$opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
-		## use critic;
-
-		# test result
-		# localisation will prevent to test for keyword as :
-		#if ( $opt_package =~ m/is not owned by any package/) {
-		# so another way is : a good answer is only one package,
-		# so only one word
-		my @rep = split /\s/, $opt_package;
-		## no critic ( ProhibitParensWithBuiltins );
-		if ( scalar(@rep) == 1 ) {
-			info("package is $opt_package");
-		}
-		else {
-			pod2usage("$opt_package is not owned by any package");
-		}
-		## use critic;
-	}
-	else {
-		pod2usage("can not find $opt_file file");
-	}
+	$opt_package = check_file($opt_file);
 }
 
 if ( !$opt_package ) {
