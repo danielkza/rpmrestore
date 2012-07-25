@@ -1,5 +1,5 @@
 # rc file exemple for rpmrestore
-# $Id:$
+# $Id$
 # it can be used as 
 # - host (general) configuration file as /etc/rpmrestorerc
 # - home (user) configuration file as ~/.rpmrestorerc
