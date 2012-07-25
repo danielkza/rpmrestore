@@ -813,6 +813,30 @@ sub trait_elem($$$$) {
 	return $nb_changes;
 }
 ###############################################################################
+# check if posix capabilities are available
+# - should exists in rpm database
+# - getcap and setcap tools should exists too
+sub check_capability(){
+
+	my $opt_capability;
+
+	# does capability exists in database ?
+	## no critic ( ProhibitBacktickOperators );
+	my $cmd = 'rpm --querytags';
+	my @output  = `$cmd`;
+	foreach my $tag (@output) {
+		if ($tag  =~ m /CAPABILITY/) {
+			$opt_capability = 1;
+			last;
+		}
+	}
+	return 0 unless $opt_capability;
+
+	# test for getcap/setcap tools
+
+	return 0;
+}
+###############################################################################
 ## no critic (ProhibitExcessComplexity)
 sub init($$) {
 	my $r_opt   = shift @_;
@@ -940,6 +964,10 @@ sub init($$) {
 
 	if ( !$opt_package ) {
 		pod2usage('missing rpm package name');
+	}
+
+	if ($opt_capability) {
+		$opt_capability = check_capability();
 	}
 	return;
 }
