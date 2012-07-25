@@ -8,5 +8,4 @@ graphical interface
 
 1.4
 posix capabilities
-	- check if capabilities exists : seach for rpm --querytags | grep CAPABILITY + getcap/setcap
-	- detect capa changes (rpm -V => P
+	- detect capa changes : rpm -V => P

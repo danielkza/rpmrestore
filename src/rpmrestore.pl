@@ -813,6 +813,19 @@ sub trait_elem($$$$) {
 	return $nb_changes;
 }
 ###############################################################################
+# search for a command in PATH
+# return true if found
+sub search_command($) {
+	my $prog = shift @_;
+
+	foreach ( split /:/, $ENV{'PATH'} ) {
+		if ( -x "$_/$prog" ) {
+			return 1;
+		}
+	}
+	return 0;
+}
+###############################################################################
 # check if posix capabilities are available
 # - should exists in rpm database
 # - getcap and setcap tools should exists too
@@ -830,11 +843,11 @@ sub check_capability(){
 			last;
 		}
 	}
+	# it is not necessary to go further
 	return 0 unless $opt_capability;
 
 	# test for getcap/setcap tools
-
-	return 0;
+	return search_command('getcap');
 }
 ###############################################################################
 ## no critic (ProhibitExcessComplexity)
@@ -966,8 +979,8 @@ sub init($$) {
 		pod2usage('missing rpm package name');
 	}
 
-	if ($opt_capability) {
-		$opt_capability = check_capability();
+	if ($opt_flag_cap) {
+		$opt_flag_cap = check_capability();
 	}
 	return;
 }
