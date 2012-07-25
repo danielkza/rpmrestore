@@ -813,137 +813,147 @@ sub trait_elem($$$$) {
 	return $nb_changes;
 }
 ###############################################################################
+## no critic (ProhibitExcessComplexity)
+sub init($$) {
+	my $r_opt   = shift @_;
+	my $version = shift @_;
+
+	my $opt_verbose = 0;
+	my $opt_help;
+	my $opt_man;
+	my $opt_version;
+	my $opt_batch;
+	my $opt_dryrun;
+	my $opt_log;
+	my $opt_rollback;
+	my $opt_file;
+	my $opt_package;
+	my $opt_flag_all;
+	my $opt_flag_mode;
+	my $opt_flag_time;
+	my $opt_flag_user;
+	my $opt_flag_group;
+	my $opt_flag_size;
+	my $opt_flag_md5;
+
+	# list of  parameter available in rcfile
+	# and ref to opt variables
+	$r_opt->{'help'}     = \$opt_help;
+	$r_opt->{'man'}      = \$opt_man;
+	$r_opt->{'verbose'}  = \$opt_verbose;
+	$r_opt->{'file'}     = \$opt_file;
+	$r_opt->{'package'}  = \$opt_package;
+	$r_opt->{'version'}  = \$opt_version;
+	$r_opt->{'batch'}    = \$opt_batch;
+	$r_opt->{'dry-run'}  = \$opt_dryrun;
+	$r_opt->{'all'}      = \$opt_flag_all;
+	$r_opt->{'user'}     = \$opt_flag_user;
+	$r_opt->{'group'}    = \$opt_flag_group;
+	$r_opt->{'mode'}     = \$opt_flag_mode;
+	$r_opt->{'time'}     = \$opt_flag_time;
+	$r_opt->{'size'}     = \$opt_flag_size;
+	$r_opt->{'md5'}      = \$opt_flag_md5;
+	$r_opt->{'log'}      = \$opt_log;
+	$r_opt->{'rollback'} = \$opt_rollback;
+
+	# set debug before any code
+	init_debug($opt_verbose);
+
+	# get options from optionnal rcfile
+	readrc($r_opt);
+
+	Getopt::Long::Configure('no_ignore_case');
+	GetOptions(
+		$r_opt,      'help|?',  'man',       'file=s',
+		'package=s', 'verbose', 'version|V', 'batch',
+		'dry-run|n', 'all',     'user!',     'group!',
+		'mode!',     'time!',   'size!',     'md5!',
+		'log=s',     'rollback=s',
+	) or pod2usage(2);
+
+	# if set debug from argument line
+	init_debug($opt_verbose);
+
+	if ($opt_help) {
+		pod2usage(1);
+	}
+	elsif ($opt_man) {
+		pod2usage( -verbose => 2 );
+	}
+	elsif ($opt_version) {
+		print_version($version);
+		exit;
+	}
+
+	# if no attributes defined, apply on all
+	if (   ( !defined $opt_flag_user )
+		&& ( !defined $opt_flag_group )
+		&& ( !defined $opt_flag_mode )
+		&& ( !defined $opt_flag_time )
+		&& ( !defined $opt_flag_size )
+		&& ( !defined $opt_flag_md5 ) )
+	{
+		$opt_flag_all = 1;
+	}
+
+	if ($opt_flag_all) {
+
+	  # just set undefined attributes to allow negative attribute (-all -notime)
+		$opt_flag_user  = ( !defined $opt_flag_user )  ? 1 : $opt_flag_user;
+		$opt_flag_group = ( !defined $opt_flag_group ) ? 1 : $opt_flag_group;
+		$opt_flag_mode  = ( !defined $opt_flag_mode )  ? 1 : $opt_flag_mode;
+		$opt_flag_time  = ( !defined $opt_flag_time )  ? 1 : $opt_flag_time;
+		$opt_flag_size  = ( !defined $opt_flag_size )  ? 1 : $opt_flag_size;
+		$opt_flag_md5   = ( !defined $opt_flag_md5 )   ? 1 : $opt_flag_md5;
+	}
+
+	# test for superuser
+	if ( ( !$opt_dryrun ) && ( $EFFECTIVE_USER_ID != 0 ) ) {
+		warning('do not run on superuser : forced to dry-run');
+		$opt_dryrun = 1;
+	}
+
+	if ($opt_verbose) {
+		debug('dump options');
+		print Dumper($r_opt);
+	}
+	if ($opt_log) {
+		open_log($opt_log);
+	}
+
+	if ($opt_rollback) {
+		rollback(
+			$opt_rollback,   $opt_batch,     $opt_dryrun, $opt_flag_user,
+			$opt_flag_group, $opt_flag_mode, $opt_flag_time
+		);
+
+		exit;
+	}
+
+	if ($opt_file) {
+		$opt_package = check_file($opt_file);
+	}
+
+	if ( !$opt_package ) {
+		pod2usage('missing rpm package name');
+	}
+	return;
+}
+
+###############################################################################
 #                             main
 ###############################################################################
 my $version = '1.4';
 
 $OUTPUT_AUTOFLUSH = 1;
 
-my $opt_verbose = 0;
-my $opt_help;
-my $opt_man;
-my $opt_version;
-my $opt_batch;
-my $opt_dryrun;
-my $opt_log;
-my $opt_rollback;
+my %opt;
+init( \%opt, $version );
 
-my $opt_file;
-my $opt_package;
-
-my $opt_flag_all;
-my $opt_flag_mode;
-my $opt_flag_time;
-my $opt_flag_user;
-my $opt_flag_group;
-my $opt_flag_size;
-my $opt_flag_md5;
-
-# list of  parameter available in rcfile
-# and ref to opt variables
-my %opt = (
-	'help'     => \$opt_help,
-	'man'      => \$opt_man,
-	'verbose'  => \$opt_verbose,
-	'file'     => \$opt_file,
-	'package'  => \$opt_package,
-	'version'  => \$opt_version,
-	'batch'    => \$opt_batch,
-	'dry-run'  => \$opt_dryrun,
-	'all'      => \$opt_flag_all,
-	'user'     => \$opt_flag_user,
-	'group'    => \$opt_flag_group,
-	'mode'     => \$opt_flag_mode,
-	'time'     => \$opt_flag_time,
-	'size'     => \$opt_flag_size,
-	'md5'      => \$opt_flag_md5,
-	'log'      => \$opt_log,
-	'rollback' => \$opt_rollback,
-);
-
-# set debug before any code
-init_debug($opt_verbose);
-
-# get options from optionnal rcfile
-readrc( \%opt );
-
-Getopt::Long::Configure('no_ignore_case');
-GetOptions(
-	\%opt,       'help|?',  'man',       'file=s',
-	'package=s', 'verbose', 'version|V', 'batch',
-	'dry-run|n', 'all',     'user!',     'group!',
-	'mode!',     'time!',   'size!',     'md5!',
-	'log=s',     'rollback=s',
-) or pod2usage(2);
-
-# set debug from argument line
-init_debug($opt_verbose);
-
-if ($opt_help) {
-	pod2usage(1);
-}
-elsif ($opt_man) {
-	pod2usage( -verbose => 2 );
-}
-elsif ($opt_version) {
-	print_version($version);
-	exit;
-}
-
-# if no attributes defined, apply on all
-if (   ( !defined $opt_flag_user )
-	&& ( !defined $opt_flag_group )
-	&& ( !defined $opt_flag_mode )
-	&& ( !defined $opt_flag_time )
-	&& ( !defined $opt_flag_size )
-	&& ( !defined $opt_flag_md5 ) )
-{
-	$opt_flag_all = 1;
-}
-
-if ($opt_flag_all) {
-
-	# just set undefined attributes to allow negative attribute (-all -notime)
-	$opt_flag_user  = ( !defined $opt_flag_user )  ? 1 : $opt_flag_user;
-	$opt_flag_group = ( !defined $opt_flag_group ) ? 1 : $opt_flag_group;
-	$opt_flag_mode  = ( !defined $opt_flag_mode )  ? 1 : $opt_flag_mode;
-	$opt_flag_time  = ( !defined $opt_flag_time )  ? 1 : $opt_flag_time;
-	$opt_flag_size  = ( !defined $opt_flag_size )  ? 1 : $opt_flag_size;
-	$opt_flag_md5   = ( !defined $opt_flag_md5 )   ? 1 : $opt_flag_md5;
-}
-
-# test for superuser
-if ( ( !$opt_dryrun ) && ( $EFFECTIVE_USER_ID != 0 ) ) {
-	warning('do not run on superuser : forced to dry-run');
-	$opt_dryrun = 1;
-}
-
-if ($opt_verbose) {
-	debug('dump options');
-	print Dumper( \%opt );
-}
-
-if ($opt_log) {
-	open_log($opt_log);
-}
-
-if ($opt_rollback) {
-
-	rollback(
-		$opt_rollback,   $opt_batch,     $opt_dryrun, $opt_flag_user,
-		$opt_flag_group, $opt_flag_mode, $opt_flag_time
-	);
-
-	exit;
-}
-
-if ($opt_file) {
-	$opt_package = check_file($opt_file);
-}
-
-if ( !$opt_package ) {
-	pod2usage('missing rpm package name');
-}
+my $opt_package = ${ $opt{'package'} };
+my $opt_log     = ${ $opt{'log'} };
+my $opt_verbose = ${ $opt{'verbose'} };
+my $opt_file    = ${ $opt{'file'} };
 
 # check if package exists
 debug("test if package $opt_package exists");
