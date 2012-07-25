@@ -705,6 +705,58 @@ sub display_checksum($$$$$) {
 	# no fix action on this parameter
 	return;
 }
+###############################################################################
+sub trait_elem($$$$) {
+	my $r_opt    = shift @_;
+	my $r_infos  = shift @_;
+	my $filename = shift @_;
+	my $change   = shift @_;
+
+	my $opt_dry_run = ${ $r_opt->{'dry-run'} };
+	my $opt_batch   = ${ $r_opt->{'batch'} };
+
+	debug("change=$change filename=$filename");
+
+	# get current info
+	my $cur_stat = stat $filename;
+
+	# rpm info
+	my $rpm_info   = $r_infos->{$filename};
+	my $nb_changes = 0;
+
+	if ( ( ${ $r_opt->{'user'} } ) and ( $change =~ m/U/ ) ) {
+		display_user( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'group'} } ) and ( $change =~ m/G/ ) ) {
+		display_group( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'time'} } ) and ( $change =~ m/T/ ) ) {
+		display_time( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'mode'} } ) and ( $change =~ m/M/ ) ) {
+		display_mode( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'size'} } ) and ( $change =~ m/S/ ) ) {
+		display_size( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'md5'} } ) and ( $change =~ m/5/ ) ) {
+		display_checksum( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	return $nb_changes;
+}
+###############################################################################
 #                             main
 ###############################################################################
 my $version = '1.4';
@@ -922,44 +974,7 @@ CHANGE: foreach my $elem (@check) {
 	if ($opt_file) {
 		next CHANGE if ( $filename ne $opt_file );
 	}
-	debug("change=$change filename=$filename");
-
-	# get current info
-	my $cur_stat = stat $filename;
-
-	# rpm info
-	my $rpm_info = $infos{$filename};
-
-	if ( ($opt_flag_user) and ( $change =~ m/U/ ) ) {
-		display_user( $rpm_info, $cur_stat, $filename, $opt_dryrun,
-			$opt_batch );
-		$nb_changes++;
-	}
-	if ( ($opt_flag_group) and ( $change =~ m/G/ ) ) {
-		display_group( $rpm_info, $cur_stat, $filename, $opt_dryrun,
-			$opt_batch );
-		$nb_changes++;
-	}
-	if ( ($opt_flag_time) and ( $change =~ m/T/ ) ) {
-		display_time( $rpm_info, $cur_stat, $filename, $opt_dryrun,
-			$opt_batch );
-		$nb_changes++;
-	}
-	if ( ($opt_flag_mode) and ( $change =~ m/M/ ) ) {
-		display_mode( $rpm_info, $cur_stat, $filename, $opt_dryrun,
-			$opt_batch );
-		$nb_changes++;
-	}
-	if ( ($opt_flag_size) and ( $change =~ m/S/ ) ) {
-		display_size( $rpm_info, $cur_stat, $filename, $opt_dryrun,
-			$opt_batch );
-		$nb_changes++;
-	}
-	if ( ($opt_flag_md5) and ( $change =~ m/5/ ) ) {
-		display_checksum( $rpm_info, $cur_stat, $filename, $opt_dryrun,
-			$opt_batch );
-		$nb_changes++;
-	}
+	$nb_changes += trait_elem( \%opt, \%infos, $filename, $change );
 }
 if ($opt_log) {
 	close $fh_log or warning("can not close $opt_log : $ERRNO");
