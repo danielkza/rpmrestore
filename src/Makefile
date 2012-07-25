@@ -20,6 +20,9 @@ MANPAGES1 := $(addsuffix .1, $(PROGS))
 HTMLPAGES := $(addsuffix .1.html, $(PROGS))
 SCRIPTS := $(addsuffix .pl, $(PROGS) ) 
 
+# file with keyword
+KEYWORD_FILES = $(SCRIPTS) Makefile Readme rpmrestorerc.sample
+
 # convert pod to other doc format
 %.1 : %.pl
 	pod2man $^ > $@
@@ -32,7 +35,7 @@ SCRIPTS := $(addsuffix .pl, $(PROGS) )
 define check_perl_script
 	for fic in $(SCRIPTS);do	\
 		perl -cw $$fic || exit;		\
-		perlcritic --verbose 10 -4 $$fic || exit;	\
+		perlcritic --verbose 10 -3 $$fic || exit;	\
 	done;
 endef
 
@@ -63,6 +66,7 @@ help :
 
 all: install
 
+# install perl scripts
 install : $(DOC) $(MANPAGES1) $(SCRIPTS)
 	mkdir -p              $(BINDIR)
 	install -m 755 $(SCRIPTS) $(BINDIR)
@@ -92,7 +96,7 @@ check : $(SCRIPTS)
 man : $(MANPAGES1)
 
 # build tar.gz package
-dist : $(DOC) man $(SCRIPTS)
+dist : $(DOC) man $(SCRIPTS) expand
 	mkdir $(PACKAGE)-$(VERSION)
 	cp -a $(DOC) $(MANPAGES1) $(SCRIPTS) $(PACKAGE)-$(VERSION)
 	tar cvfz $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
@@ -104,7 +108,7 @@ rpm : dist
 	rpmbuild -ta --sign $(PACKAGE)-$(VERSION).tar.gz
 
 # clean temp files
-clean :
+clean : unexpand
 	rm -f $(MANPAGES1)
 	rm -f $(PACKAGE)-$(VERSION).tar.gz
 	rm -f pod2*
@@ -112,6 +116,15 @@ clean :
 
 # build man page in html for web site
 html : $(HTMLPAGES)
+
+# expand svn keywords just for publish
+expand: $(KEYWORD_FILES)
+	git tag -f "$(PACKAGE)-$(VERSION)"
+	git-svn-keyword-expand $(KEYWORD_FILES)
+
+# remove svn keywords to keep repository clean
+unexpand: $(KEYWORD_FILES)
+	git-svn-keyword-unexpand $(KEYWORD_FILES)
 
 # to be done on root account juster after the package install
 test :
