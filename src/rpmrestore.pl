@@ -99,14 +99,15 @@ sub touch_fmt($) {
 ###############################################################################
 # get all info about files from a package
 # and populate a hash of hash
-sub get_rpm_infos($$) {
-	my $package      = shift @_;
-	my $opt_flag_cap = shift @_;
+sub get_rpm_infos($) {
+	my $package = shift @_;
+
+	my $flag_cap = check_rpm_capability();
 
 	# use space as field separator : see below
 	# md5 is the last field because it may not exists (directories)
 	# same for capability
-	my $query_cap = $opt_flag_cap ? "%{CAPABILITY}" : q{};
+	my $query_cap = $flag_cap ? '%{CAPABILITY}' : q{};
 
 	my $queryformat =
 
@@ -133,8 +134,11 @@ sub get_rpm_infos($$) {
 			size  => $tab[5],
 			md5   => $tab[6],
 		);
-		if ($opt_flag_cap) {
+		if ($flag_cap) {
 			$h2{capability} = $tab[7];
+		}
+		else {
+			$h2{capability} = 'unknown';
 		}
 		$h{$name} = \%h2;
 	}
@@ -144,7 +148,7 @@ sub get_rpm_infos($$) {
 # just print a line on current version
 sub print_version($) {
 	my $version = shift @_;
-	info("$0 version $version");
+	info("$PROGRAM_NAME version $version");
 	return;
 }
 ###############################################################################
@@ -592,7 +596,7 @@ sub change_time($$) {
 }
 ###############################################################################
 sub change_capa($$) {
-	my $new_capa  = shift @_;
+	my $new_capa = shift @_;
 	my $filename = shift @_;
 
 	system "setcap $new_capa $filename";
@@ -727,6 +731,17 @@ sub display_checksum($$$$$) {
 	return;
 }
 ###############################################################################
+sub getcap($) {
+	my $filename = shift @_;
+
+	## no critic ( ProhibitBacktickOperators );
+	my $out = `getcap $filename`;
+	chomp $out;
+
+	my ( undef, $h_capa ) = split /=/, $out;
+	return $h_capa;
+}
+###############################################################################
 sub display_capability($$$$$) {
 	my $rpm_info   = shift @_;
 	my $cur_stat   = shift @_;
@@ -734,12 +749,30 @@ sub display_capability($$$$$) {
 	my $opt_dryrun = shift @_;
 	my $opt_batch  = shift @_;
 
-	my $rpm_cap = $rpm_info->{'capability'};
-	my $h_capa = `getcap $filename`;
+	my $flag_cap = check_capability();
+	if ($flag_cap) {
 
-	my $action = sub { change_capa( $rpm_cap, $filename ); };
-	ask( $opt_dryrun, $opt_batch, $action, $filename, 'capability', $rpm_cap,
-		$h_capa );
+		# ok all is available to show and modify
+		my $rpm_cap = $rpm_info->{'capability'};
+		my $h_capa  = getcap($filename);
+
+		my $action = sub { change_capa( $rpm_cap, $filename ); };
+		ask(
+			$opt_dryrun,  $opt_batch, $action, $filename,
+			'capability', $rpm_cap,   $h_capa
+		);
+	}
+	else {
+		my $rpm_cap = 'unknown';
+		my $h_capa  = 'unknown';
+		if ( check_rpm_capability() ) {
+			$rpm_cap = $rpm_info->{'capability'};
+		}
+		if ( check_capability_tools() ) {
+			$h_capa = getcap($filename);
+		}
+		display( $filename, 'capability', $rpm_cap, $h_capa );
+	}
 
 	return;
 }
@@ -869,12 +902,9 @@ sub search_command($) {
 	return 0;
 }
 ###############################################################################
-# check if posix capabilities are available
-# - should exists in rpm database
-# - getcap and setcap tools should exists too
-sub check_capability() {
+sub check_rpm_capability() {
 
-	my $opt_capability;
+	my $opt_capability = 0;
 
 	# does capability exists in database ?
 	## no critic ( ProhibitBacktickOperators );
@@ -886,13 +916,20 @@ sub check_capability() {
 			last;
 		}
 	}
-
-	debug("no rpm capability");
-	# it is not necessary to go further
-	return 0 unless $opt_capability;
-
-	# test for getcap/setcap tools
+	debug("rpm capability : $opt_capability");
+	return $opt_capability;
+}
+###############################################################################
+sub check_capability_tools() {
 	return search_command('getcap');
+}
+###############################################################################
+# check if posix capabilities are available
+# - should exists in rpm database
+# - getcap and setcap tools should exists too
+sub check_capability() {
+
+	return ( check_rpm_capability() and check_capability_tools() );
 }
 ###############################################################################
 ## no critic (ProhibitExcessComplexity)
@@ -1024,9 +1061,6 @@ sub init($$) {
 		pod2usage('missing rpm package name');
 	}
 
-	if ($opt_flag_cap) {
-		$opt_flag_cap = check_capability();
-	}
 	return;
 }
 
@@ -1067,7 +1101,7 @@ if ( !@check ) {
 	info('0 changes detected : exit');
 	exit;
 }
-my %infos = get_rpm_infos( $opt_package, $opt_flag_cap );
+my %infos = get_rpm_infos($opt_package);
 
 print Dumper(%infos) if ($opt_verbose);
 
