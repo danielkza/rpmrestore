@@ -102,27 +102,44 @@ sub touch_fmt($) {
 sub get_rpm_infos($) {
 	my $package = shift @_;
 
+	my $flag_cap = check_rpm_capability();
+
 	# use space as field separator : see below
 	# md5 is the last field because it may not exists (directories)
+	# same for capability
+	my $query_cap = $flag_cap ? '%{CAPABILITY}' : q{};
+
+	my $queryformat =
+
+#  tab   0               1                  2                3               4            5            6          7
+"[%{FILENAMES} %6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILEMD5S} $query_cap\\n]";
+	my $cmd = "rpm -q --queryformat \"$queryformat\" $package";
+	debug($cmd);
+
 	## no critic ( ProhibitBacktickOperators );
-	my @info =
-`rpm -q --queryformat "[%6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILENAMES} %{FILEMD5S}\n]" $package `;
+	my @info = `$cmd`;
 	## use critic;
 
 	my %h;
 	my $space = q{ };
 	foreach my $elem (@info) {
-		my ( $mode, $user, $group, $mtime, $size, $name, $md5 ) =
-		  split /$space/, $elem;
-		chomp $md5;
-		my %h2 = (
-			mode  => $mode,
-			user  => $user,
-			group => $group,
-			mtime => $mtime,
-			size  => $size,
-			md5   => $md5,
+		chomp $elem;
+		my @tab  = split /$space/, $elem;
+		my $name = $tab[0];
+		my %h2   = (
+			mode  => $tab[1],
+			user  => $tab[2],
+			group => $tab[3],
+			mtime => $tab[4],
+			size  => $tab[5],
+			md5   => $tab[6],
 		);
+		if ($flag_cap) {
+			$h2{capability} = $tab[7];
+		}
+		else {
+			$h2{capability} = 'unknown';
+		}
 		$h{$name} = \%h2;
 	}
 	return %h;
@@ -131,7 +148,7 @@ sub get_rpm_infos($) {
 # just print a line on current version
 sub print_version($) {
 	my $version = shift @_;
-	info("$0 version $version");
+	info("$PROGRAM_NAME version $version");
 	return;
 }
 ###############################################################################
@@ -387,9 +404,44 @@ sub rollback_time($$$$$$$) {
 	return $nb_rollback;
 }
 ###############################################################################
+sub rollback_cap($$$$$$$) {
+	my $opt_batch  = shift @_;
+	my $opt_dryrun = shift @_;
+	my $fic        = shift @_;
+	my $line       = shift @_;
+	my $to         = shift @_;
+	my $from       = shift @_;
+	my $cur_stat   = shift @_;
+
+	my $nb_rollback = 0;
+
+	# if rollback entry exist, setcap/getcap should exists but ...
+	if ( check_capability_tools() ) {
+		my $cur_cap = getcap($fic);
+
+		my $to_cap = $to;
+		if ( $to_cap != $cur_cap ) {
+			warning(
+"current capability $cur_cap does not match rollback value : $to_cap (line $line)"
+			);
+		}
+		else {
+			my $action = sub { change_mode( $from, $fic ); };
+			ask( $opt_dryrun, $opt_batch, $action, $fic, 'capability', $from,
+				$to );
+			$nb_rollback++;
+		}
+	}
+	else {
+		warning("sorry : could not find getcap/setcap tools");
+	}
+
+	return $nb_rollback;
+}
+###############################################################################
 # use log file to revert change
 # it looks very similar to main code
-sub rollback($$$$$$$) {
+sub rollback($$$$$$$$) {
 	my $log        = shift @_;
 	my $opt_batch  = shift @_;
 	my $opt_dryrun = shift @_;
@@ -397,7 +449,9 @@ sub rollback($$$$$$$) {
 	my $opt_group  = shift @_;
 	my $opt_mode   = shift @_;
 	my $opt_time   = shift @_;
+	my $opt_cap    = shift @_;
 
+	## no critic (RequireBriefOpen)
 	my $fh_roll;
 	if ( !open $fh_roll, '<', $log ) {
 		die "can not open rollback file $log : $ERRNO\n";
@@ -458,6 +512,14 @@ sub rollback($$$$$$$) {
 
 				}
 			}
+			elsif ( $param eq 'capability' ) {
+				if ($opt_mode) {
+					$nb_rollback +=
+					  rollback_cap( $opt_batch, $opt_dryrun, $fic, $line, $to,
+						$from, $cur_stat );
+
+				}
+			}
 			else {
 				warning("bad parameter $param on line $line : $_");
 			}
@@ -497,11 +559,10 @@ sub read1rc($$) {
 				if ( exists $rh_list->{$key} ) {
 					${ $rh_list->{$key} } = $value;
 					init_debug($value) if ( $key eq 'verbose' );
-					debug( "rcfile : found $key parameter with $value value" );
+					debug("rcfile : found $key parameter with $value value");
 				}
 				else {
-					warning(
-						"bad $key parameter in line $line in $rcfile file" );
+					warning("bad $key parameter in line $line in $rcfile file");
 				}
 			}
 			else {
@@ -578,117 +639,190 @@ sub change_time($$) {
 	return;
 }
 ###############################################################################
-#                             main
+sub change_capa($$) {
+	my $new_capa = shift @_;
+	my $filename = shift @_;
+
+	system "setcap $new_capa $filename";
+	return;
+}
 ###############################################################################
-my $VERSION = '1.4';
+sub display_user($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
 
-$OUTPUT_AUTOFLUSH = 1;
+	my $rpm_user = $rpm_info->{'user'};
+	my $rpm_uid  = getpwnam $rpm_user;
+	my $uid      = $cur_stat->uid();
+	my $user     = getpwuid $uid;
 
-my $opt_verbose = 0;
-my $opt_help;
-my $opt_man;
-my $opt_version;
-my $opt_batch;
-my $opt_dryrun;
-my $opt_log;
-my $opt_rollback;
+	my $action = sub { change_user( $rpm_uid, $filename ); };
+	ask(
+		$opt_dryrun, $opt_batch, $action, $filename, 'user',
+		set_val( $rpm_uid, $rpm_user ),
+		set_val( $uid,     $user )
+	);
 
-my $opt_file;
-my $opt_package;
-
-my $opt_flag_all;
-my $opt_flag_mode;
-my $opt_flag_time;
-my $opt_flag_user;
-my $opt_flag_group;
-my $opt_flag_size;
-my $opt_flag_md5;
-
-# list of  parameter available in rcfile
-# and ref to opt variables
-my %opt = (
-	'help'     => \$opt_help,
-	'man'      => \$opt_man,
-	'verbose'  => \$opt_verbose,
-	'file'     => \$opt_file,
-	'package'  => \$opt_package,
-	'version'  => \$opt_version,
-	'batch'    => \$opt_batch,
-	'dry-run'  => \$opt_dryrun,
-	'all'      => \$opt_flag_all,
-	'user'     => \$opt_flag_user,
-	'group'    => \$opt_flag_group,
-	'mode'     => \$opt_flag_mode,
-	'time'     => \$opt_flag_time,
-	'size'     => \$opt_flag_size,
-	'md5'      => \$opt_flag_md5,
-	'log'      => \$opt_log,
-	'rollback' => \$opt_rollback,
-);
-
-# set debug before any code
-init_debug($opt_verbose);
-
-# get options from optionnal rcfile
-readrc( \%opt );
-
-Getopt::Long::Configure('no_ignore_case');
-GetOptions(
-	\%opt,       'help|?',  'man',       'file=s',
-	'package=s', 'verbose', 'version|V', 'batch',
-	'dry-run|n', 'all',     'user!',     'group!',
-	'mode!',     'time!',   'size!',     'md5!',
-	'log=s',     'rollback=s',
-) or pod2usage(2);
-
-# set debug from argument line
-init_debug($opt_verbose);
-
-if ($opt_help) {
-	pod2usage(1);
+	return;
 }
-elsif ($opt_man) {
-	pod2usage( -verbose => 2 );
-}
-elsif ($opt_version) {
-	print_version($VERSION);
-	exit;
-}
+###############################################################################
+sub display_group($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
 
-# if no attributes defined, apply on all
-if (   ( !defined $opt_flag_user )
-	&& ( !defined $opt_flag_group )
-	&& ( !defined $opt_flag_mode )
-	&& ( !defined $opt_flag_time )
-	&& ( !defined $opt_flag_size )
-	&& ( !defined $opt_flag_md5 ) )
-{
-	$opt_flag_all = 1;
+	my $rpm_group = $rpm_info->{'group'};
+	my $rpm_gid   = getgrnam $rpm_group;
+	my $gid       = $cur_stat->gid();
+	my $group     = getgrgid $gid;
+
+	my $action = sub { change_group( $rpm_gid, $filename ); };
+	ask(
+		$opt_dryrun, $opt_batch, $action, $filename, 'group',
+		set_val( $rpm_gid, $rpm_group ),
+		set_val( $gid,     $group )
+	);
+
+	return;
 }
+###############################################################################
+sub display_mode($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
 
-if ($opt_flag_all) {
+	my $rpm_mode = $rpm_info->{'mode'};
+	my $h_mode = sprintf '%lo', $cur_stat->mode();
 
-	# just set undefined attributes to allow negative attribute (-all -notime)
-	$opt_flag_user  = ( !defined $opt_flag_user )  ? 1 : $opt_flag_user;
-	$opt_flag_group = ( !defined $opt_flag_group ) ? 1 : $opt_flag_group;
-	$opt_flag_mode  = ( !defined $opt_flag_mode )  ? 1 : $opt_flag_mode;
-	$opt_flag_time  = ( !defined $opt_flag_time )  ? 1 : $opt_flag_time;
-	$opt_flag_size  = ( !defined $opt_flag_size )  ? 1 : $opt_flag_size;
-	$opt_flag_md5   = ( !defined $opt_flag_md5 )   ? 1 : $opt_flag_md5;
+	my $action = sub { change_mode( $rpm_mode, $filename ); };
+	ask( $opt_dryrun, $opt_batch, $action, $filename, 'mode', $rpm_mode,
+		$h_mode );
+
+	return;
 }
+###############################################################################
+sub display_size($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
 
-# test for superuser
-if ( ( !$opt_dryrun ) && ( $EFFECTIVE_USER_ID != 0 ) ) {
-	warning('do not run on superuser : forced to dry-run');
-	$opt_dryrun = 1;
+	my $rpm_size = $rpm_info->{'size'};
+	my $size     = $cur_stat->size();
+
+	display( $filename, 'size', $rpm_size, $size );
+
+	# no fix action on this parameter
+	return;
 }
+###############################################################################
+sub display_time($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
 
-if ($opt_verbose) {
-	debug('dump options');
-	print Dumper( \%opt );
+	my $rpm_mtime   = $rpm_info->{'mtime'};
+	my $rpm_h_mtime = touch_fmt($rpm_mtime);
+	my $cur_mtime   = $cur_stat->mtime();
+	my $cur_h_mtime = touch_fmt($cur_mtime);
+
+	my $action = sub { change_time( $rpm_mtime, $filename ); };
+	ask(
+		$opt_dryrun, $opt_batch, $action, $filename, 'mtime',
+		set_val( $rpm_mtime, $rpm_h_mtime ),
+		set_val( $cur_mtime, $cur_h_mtime )
+	);
+
+	return;
 }
+###############################################################################
+sub display_checksum($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
 
-if ($opt_log) {
+	debug('md5');
+	my $rpm_md5 = $rpm_info->{'md5'};
+
+	my $ctx = Digest::MD5->new;
+
+	my $cur_md5;
+	if ( open my $fh_fic, '<', $filename ) {
+		$ctx->addfile($fh_fic);
+		$cur_md5 = $ctx->hexdigest();
+		close $fh_fic or warning("can not close $filename : $ERRNO");
+	}
+	else {
+		warning("can not open $filename for md5 : $ERRNO");
+		$cur_md5 = q{};
+	}
+
+	display( $filename, 'md5', $rpm_md5, $cur_md5 );
+
+	# no fix action on this parameter
+	return;
+}
+###############################################################################
+sub getcap($) {
+	my $filename = shift @_;
+
+	## no critic ( ProhibitBacktickOperators );
+	my $out = `getcap $filename`;
+	chomp $out;
+
+	my ( undef, $h_capa ) = split /=/, $out;
+	return $h_capa;
+}
+###############################################################################
+sub display_capability($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
+
+	my $flag_cap = check_capability();
+	if ($flag_cap) {
+
+		# ok all is available to show and modify
+		my $rpm_cap = $rpm_info->{'capability'};
+		my $h_capa  = getcap($filename);
+
+		my $action = sub { change_capa( $rpm_cap, $filename ); };
+		ask(
+			$opt_dryrun,  $opt_batch, $action, $filename,
+			'capability', $rpm_cap,   $h_capa
+		);
+	}
+	else {
+		my $rpm_cap = 'unknown';
+		my $h_capa  = 'unknown';
+		if ( check_rpm_capability() ) {
+			$rpm_cap = $rpm_info->{'capability'};
+		}
+		if ( check_capability_tools() ) {
+			$h_capa = getcap($filename);
+		}
+		display( $filename, 'capability', $rpm_cap, $h_capa );
+	}
+
+	return;
+}
+###############################################################################
+sub open_log($) {
+	my $opt_log = shift @_;
 
 	# open log file
 	my $open_mode;
@@ -704,32 +838,26 @@ if ($opt_log) {
 	if ( !open $fh_log, $open_mode, $opt_log ) {
 		warning("can not open log file $opt_log : $ERRNO");
 	}
+
+	return;
 }
-
-if ($opt_rollback) {
-
-	rollback(
-		$opt_rollback,   $opt_batch,     $opt_dryrun, $opt_flag_user,
-		$opt_flag_group, $opt_flag_mode, $opt_flag_time
-	);
-
-	exit;
-}
-
-if ($opt_file) {
+###############################################################################
+sub check_file($) {
+	my $opt_file = shift @_;
 
 	# check if file exists
 	if ( -e $opt_file ) {
 
 		# get rpm from file
 		## no critic ( ProhibitBacktickOperators );
-		$opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
+		my $opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
 		## use critic;
 
-	   # test result
-	   # localisation will prevent to test for keyword as :
-	   #if ( $opt_package =~ m/is not owned by any package/) {
-	   # so another way is : a good answer is only one package, so only one word
+		# test result
+		# localisation will prevent to test for keyword as :
+		#if ( $opt_package =~ m/is not owned by any package/) {
+		# so another way is : a good answer is only one package,
+		# so only one word
 		my @rep = split /\s/, $opt_package;
 		## no critic ( ProhibitParensWithBuiltins );
 		if ( scalar(@rep) == 1 ) {
@@ -739,15 +867,262 @@ if ($opt_file) {
 			pod2usage("$opt_package is not owned by any package");
 		}
 		## use critic;
+
+		return $opt_package;
 	}
 	else {
 		pod2usage("can not find $opt_file file");
 	}
+
+	return;
+}
+###############################################################################
+sub trait_elem($$$$) {
+	my $r_opt    = shift @_;
+	my $r_infos  = shift @_;
+	my $filename = shift @_;
+	my $change   = shift @_;
+
+	my $opt_dry_run = ${ $r_opt->{'dry-run'} };
+	my $opt_batch   = ${ $r_opt->{'batch'} };
+
+	debug("change=$change filename=$filename");
+
+	# get current info
+	my $cur_stat = stat $filename;
+
+	# rpm info
+	my $rpm_info   = $r_infos->{$filename};
+	my $nb_changes = 0;
+
+	if ( ( ${ $r_opt->{'user'} } ) and ( $change =~ m/U/ ) ) {
+		display_user( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'group'} } ) and ( $change =~ m/G/ ) ) {
+		display_group( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'time'} } ) and ( $change =~ m/T/ ) ) {
+		display_time( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'mode'} } ) and ( $change =~ m/M/ ) ) {
+		display_mode( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'size'} } ) and ( $change =~ m/S/ ) ) {
+		display_size( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'md5'} } ) and ( $change =~ m/5/ ) ) {
+		display_checksum( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'capability'} } ) and ( $change =~ m/P/ ) ) {
+		display_capability( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	return $nb_changes;
+}
+###############################################################################
+# search for a command in PATH
+# return the command if found, else false
+sub search_command($) {
+	my $prog = shift @_;
+
+	foreach ( split /:/, $ENV{'PATH'} ) {
+		if ( -x "$_/$prog" ) {
+			return "$_/$prog";
+		}
+	}
+	return 0;
+}
+###############################################################################
+sub check_rpm_capability() {
+
+	my $opt_capability = 0;
+
+	# does capability exists in database ?
+	## no critic ( ProhibitBacktickOperators );
+	my $cmd    = 'rpm --querytags';
+	my @output = `$cmd`;
+	foreach my $tag (@output) {
+		if ( $tag =~ m/CAPABILITY/ ) {
+			$opt_capability = 1;
+			last;
+		}
+	}
+	debug("rpm capability : $opt_capability");
+	return $opt_capability;
+}
+###############################################################################
+sub check_capability_tools() {
+	return search_command('getcap');
+}
+###############################################################################
+# check if posix capabilities are available
+# - should exists in rpm database
+# - getcap and setcap tools should exists too
+sub check_capability() {
+
+	return ( check_rpm_capability() and check_capability_tools() );
+}
+###############################################################################
+## no critic (ProhibitExcessComplexity)
+sub init($$) {
+	my $r_opt   = shift @_;
+	my $version = shift @_;
+
+	my $opt_verbose = 0;
+	my $opt_help;
+	my $opt_man;
+	my $opt_version;
+	my $opt_batch;
+	my $opt_dryrun;
+	my $opt_log;
+	my $opt_rollback;
+	my $opt_file;
+	my $opt_package;
+	my $opt_flag_all;
+	my $opt_flag_mode;
+	my $opt_flag_time;
+	my $opt_flag_user;
+	my $opt_flag_group;
+	my $opt_flag_size;
+	my $opt_flag_md5;
+	my $opt_flag_cap;
+
+	# list of  parameter available in rcfile
+	# and ref to opt variables
+	$r_opt->{'help'}       = \$opt_help;
+	$r_opt->{'man'}        = \$opt_man;
+	$r_opt->{'verbose'}    = \$opt_verbose;
+	$r_opt->{'file'}       = \$opt_file;
+	$r_opt->{'package'}    = \$opt_package;
+	$r_opt->{'version'}    = \$opt_version;
+	$r_opt->{'batch'}      = \$opt_batch;
+	$r_opt->{'dry-run'}    = \$opt_dryrun;
+	$r_opt->{'all'}        = \$opt_flag_all;
+	$r_opt->{'user'}       = \$opt_flag_user;
+	$r_opt->{'group'}      = \$opt_flag_group;
+	$r_opt->{'mode'}       = \$opt_flag_mode;
+	$r_opt->{'time'}       = \$opt_flag_time;
+	$r_opt->{'size'}       = \$opt_flag_size;
+	$r_opt->{'md5'}        = \$opt_flag_md5;
+	$r_opt->{'capability'} = \$opt_flag_cap;
+	$r_opt->{'log'}        = \$opt_log;
+	$r_opt->{'rollback'}   = \$opt_rollback;
+
+	# set debug before any code
+	init_debug($opt_verbose);
+
+	# get options from optionnal rcfile
+	readrc($r_opt);
+
+	Getopt::Long::Configure('no_ignore_case');
+	GetOptions(
+		$r_opt,        'help|?',  'man',       'file=s',
+		'package=s',   'verbose', 'version|V', 'batch',
+		'dry-run|n',   'all',     'user!',     'group!',
+		'mode!',       'time!',   'size!',     'md5!',
+		'capability!', 'log=s',   'rollback=s',
+	) or pod2usage(2);
+
+	# if set debug from argument line
+	init_debug($opt_verbose);
+
+	if ($opt_help) {
+		pod2usage(1);
+	}
+	elsif ($opt_man) {
+		pod2usage( -verbose => 2 );
+	}
+	elsif ($opt_version) {
+		print_version($version);
+		exit;
+	}
+
+	# if no attributes defined, apply on all
+	if (   ( !defined $opt_flag_user )
+		&& ( !defined $opt_flag_group )
+		&& ( !defined $opt_flag_mode )
+		&& ( !defined $opt_flag_time )
+		&& ( !defined $opt_flag_size )
+		&& ( !defined $opt_flag_md5 )
+		&& ( !defined $opt_flag_cap ) )
+	{
+		$opt_flag_all = 1;
+	}
+
+	if ($opt_flag_all) {
+
+	  # just set undefined attributes to allow negative attribute (-all -notime)
+		$opt_flag_user  = ( !defined $opt_flag_user )  ? 1 : $opt_flag_user;
+		$opt_flag_group = ( !defined $opt_flag_group ) ? 1 : $opt_flag_group;
+		$opt_flag_mode  = ( !defined $opt_flag_mode )  ? 1 : $opt_flag_mode;
+		$opt_flag_time  = ( !defined $opt_flag_time )  ? 1 : $opt_flag_time;
+		$opt_flag_size  = ( !defined $opt_flag_size )  ? 1 : $opt_flag_size;
+		$opt_flag_md5   = ( !defined $opt_flag_md5 )   ? 1 : $opt_flag_md5;
+		$opt_flag_cap   = ( !defined $opt_flag_cap )   ? 1 : $opt_flag_cap;
+	}
+
+	# test for superuser
+	if ( ( !$opt_dryrun ) && ( $EFFECTIVE_USER_ID != 0 ) ) {
+		warning('do not run on superuser : forced to dry-run');
+		$opt_dryrun = 1;
+	}
+
+	if ($opt_verbose) {
+		debug('dump options');
+		print Dumper($r_opt);
+	}
+	if ($opt_log) {
+		open_log($opt_log);
+	}
+
+	if ($opt_rollback) {
+		rollback(
+			$opt_rollback,   $opt_batch,     $opt_dryrun,    $opt_flag_user,
+			$opt_flag_group, $opt_flag_mode, $opt_flag_time, $opt_flag_cap,
+		);
+
+		exit;
+	}
+
+	if ($opt_file) {
+		$opt_package = check_file($opt_file);
+	}
+
+	if ( !$opt_package ) {
+		pod2usage('missing rpm package name');
+	}
+
+	return;
 }
 
-if ( !$opt_package ) {
-	pod2usage('missing rpm package name');
-}
+###############################################################################
+#                             main
+###############################################################################
+my $version = '1.4';
+
+$OUTPUT_AUTOFLUSH = 1;
+
+my %opt;
+init( \%opt, $version );
+
+my $opt_package  = ${ $opt{'package'} };
+my $opt_log      = ${ $opt{'log'} };
+my $opt_verbose  = ${ $opt{'verbose'} };
+my $opt_file     = ${ $opt{'file'} };
+my $opt_flag_cap = ${ $opt{'capability'} };
 
 # check if package exists
 debug("test if package $opt_package exists");
@@ -772,12 +1147,7 @@ if ( !@check ) {
 }
 my %infos = get_rpm_infos($opt_package);
 
-#print Dumper(%infos);
-# we can act on some changes :
-# U user
-# G group
-# T mtime
-# M mode
+print Dumper(%infos) if ($opt_verbose);
 
 my $nb_changes = 0;
 CHANGE: foreach my $elem (@check) {
@@ -786,12 +1156,13 @@ CHANGE: foreach my $elem (@check) {
 	next CHANGE if ( $elem =~ m/^missing/ );
 	next CHANGE if ( $elem =~ m/^Unsatisfied/ );
 
-   # rpm -V output can have 2 or 3 fields :
-   # S.?....T c /etc/afick.conf
-   # missing  c /etc/logrotate.d/afick
-   # S.5....T   /usr/bin/afick.pl
-   # S.5....T g /var/lib/afick/archive
-   # ? is get when rpmrestore does not have any perm to the file (user not root)
+	# rpm -V output can have 2 or 3 fields :
+	# S.?....T c /etc/afick.conf
+	# missing  c /etc/logrotate.d/afick
+	# S.5....T   /usr/bin/afick.pl
+	# S.5....T g /var/lib/afick/archive
+	# ? is get when rpmrestore does not have any perm
+	# to the file (user not root)
 	my ( $change, $config, $filename ) = split /\s+/, $elem;
 
 	if ( !$filename ) {
@@ -800,96 +1171,7 @@ CHANGE: foreach my $elem (@check) {
 	if ($opt_file) {
 		next CHANGE if ( $filename ne $opt_file );
 	}
-	debug("change=$change filename=$filename");
-
-	# get current info
-	my $cur_stat = stat $filename;
-
-	# rpm info
-	my $rpm_info = $infos{$filename};
-
-	if ( ($opt_flag_user) and ( $change =~ m/U/ ) ) {
-		my $rpm_user = $rpm_info->{user};
-		my $rpm_uid  = getpwnam $rpm_user;
-		my $uid      = $cur_stat->uid();
-		my $user     = getpwuid $uid;
-
-		my $action = sub { change_user( $rpm_uid, $filename ); };
-		ask(
-			$opt_dryrun, $opt_batch, $action, $filename, 'user',
-			set_val( $rpm_uid, $rpm_user ),
-			set_val( $uid,     $user )
-		);
-		$nb_changes++;
-	}
-	if ( ($opt_flag_group) and ( $change =~ m/G/ ) ) {
-		my $rpm_group = $rpm_info->{group};
-		my $rpm_gid   = getgrnam $rpm_group;
-		my $gid       = $cur_stat->gid();
-		my $group     = getgrgid $gid;
-
-		my $action = sub { change_group( $rpm_gid, $filename ); };
-		ask(
-			$opt_dryrun, $opt_batch, $action, $filename, 'group',
-			set_val( $rpm_gid, $rpm_group ),
-			set_val( $gid,     $group )
-		);
-		$nb_changes++;
-	}
-	if ( ($opt_flag_time) and ( $change =~ m/T/ ) ) {
-		my $rpm_mtime   = $rpm_info->{mtime};
-		my $rpm_h_mtime = touch_fmt($rpm_mtime);
-		my $cur_mtime   = $cur_stat->mtime();
-		my $cur_h_mtime = touch_fmt($cur_mtime);
-
-		my $action = sub { change_time( $rpm_mtime, $filename ); };
-		ask(
-			$opt_dryrun, $opt_batch, $action, $filename, 'mtime',
-			set_val( $rpm_mtime, $rpm_h_mtime ),
-			set_val( $cur_mtime, $cur_h_mtime )
-		);
-		$nb_changes++;
-	}
-	if ( ($opt_flag_mode) and ( $change =~ m/M/ ) ) {
-		my $rpm_mode = $rpm_info->{mode};
-		my $h_mode = sprintf '%lo', $cur_stat->mode();
-
-		my $action = sub { change_mode( $rpm_mode, $filename ); };
-		ask( $opt_dryrun, $opt_batch, $action, $filename, 'mode', $rpm_mode,
-			$h_mode );
-		$nb_changes++;
-	}
-	if ( ($opt_flag_size) and ( $change =~ m/S/ ) ) {
-		my $rpm_size = $rpm_info->{size};
-		my $size     = $cur_stat->size();
-
-		display( $filename, 'size', $rpm_size, $size );
-
-		# no fix action on this parameter
-		$nb_changes++;
-	}
-	if ( ($opt_flag_md5) and ( $change =~ m/5/ ) ) {
-		debug('md5');
-		my $rpm_md5 = $rpm_info->{md5};
-
-		my $ctx = Digest::MD5->new;
-
-		my $cur_md5;
-		if ( open my $fh_fic, '<', $filename ) {
-			$ctx->addfile($fh_fic);
-			$cur_md5 = $ctx->hexdigest();
-			close $fh_fic or warning("can not close $filename : $ERRNO");
-		}
-		else {
-			warning("can not open $filename for md5 : $ERRNO");
-			$cur_md5 = q{};
-		}
-
-		display( $filename, 'md5', $rpm_md5, $cur_md5 );
-
-		# no fix action on this parameter
-		$nb_changes++;
-	}
+	$nb_changes += trait_elem( \%opt, \%infos, $filename, $change );
 }
 if ($opt_log) {
 	close $fh_log or warning("can not close $opt_log : $ERRNO");
@@ -1038,41 +1320,46 @@ md5 is a checksum (a kind of fingerprint) : if the file content is changed, the 
 A difference on this attribute means the file content was changed. This is a "read-only" attribute : 
 it can not be restored by the program.
 
+=item B<-capability>
+
+capability means for posix capability. This is not available on all linux distributions.
+You can look getcap/setcap man pages for more informations.
+
 =back
 
 =head1 USAGE
 
 the rpm command to control changes 
  
-rpm -V rpm
+  rpm -V rpm
 
 same effect (just display) but more detailed (display values)
 
-rpmrestore.pl -n -package rpm
+  rpmrestore.pl -n -package rpm
 
 interactive change mode, only on time attribute
 
-rpmrestore.pl -time -package rpm
+  rpmrestore.pl -time -package rpm
 
 interactive change mode, on all attributes except time attribute
 
-rpmrestore.pl -all -notime -package rpm
+  rpmrestore.pl -all -notime -package rpm
 
 batch change mode (DANGEROUS) on mode attribute with log file
 
-rpmrestore.pl -batch -package rpm -log /tmp/log
+  rpmrestore.pl -batch -package rpm -log /tmp/log
 
 interactive change of mode attribute on file /etc/motd
 
-rpmrestore.pl -mode -file /etc/motd
+  rpmrestore.pl -mode -file /etc/motd
 
 interactive rollback from /tmp/log
 
-rpmrestore.pl -rollback /tmp/log
+  rpmrestore.pl -rollback /tmp/log
 
 batch rollback user changes from /tmp/log
 
-rpmrestore.pl -batch -user -rollback /tmp/log
+  rpmrestore.pl -batch -user -rollback /tmp/log
 
 =head1 CONFIGURATION
 

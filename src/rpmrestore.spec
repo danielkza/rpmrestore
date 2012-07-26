@@ -1,4 +1,4 @@
-%define VERSION 1.3
+%define VERSION 1.4
 # Initial spec file created by autospec ver. 0.8 with rpm 3 compatibility
 Summary: rpmrestore restore file attributes from rpm database
 # The Summary: line should be expanded to about here -----^
