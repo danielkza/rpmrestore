@@ -116,6 +116,7 @@ clean : unexpand
 
 # build man page in html for web site
 html : $(HTMLPAGES)
+	mv *.html ../web
 
 # expand svn keywords just for publish
 expand: $(KEYWORD_FILES)
