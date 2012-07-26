@@ -135,7 +135,8 @@ sub get_rpm_infos($) {
 			md5   => $tab[6],
 		);
 		if ($flag_cap) {
-			$h2{capability} = $tab[7];
+			# because rpm return such "= cap_net_raw+ep"
+			$h2{capability} = $tab[8];
 		}
 		else {
 			$h2{capability} = 'unknown';
