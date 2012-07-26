@@ -761,7 +761,7 @@ if ( $CHILD_ERROR != 0 ) {
 ## no critic (RequireLocalizedPunctuationVars)
 $ENV{'LC_ALL'} = 'POSIX';
 ## no critic ( ProhibitBacktickOperators );
-my @check = `rpm -V $opt_package`;
+my @check = `rpm -V $opt_package 2>/dev/null`;
 ## use critic;
 
 print Dumper(@check) if ($opt_verbose);
