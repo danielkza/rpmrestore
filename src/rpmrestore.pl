@@ -824,13 +824,13 @@ sub trait_elem($$$$) {
 }
 ###############################################################################
 # search for a command in PATH
-# return true if found
+# return the command if found, else false
 sub search_command($) {
 	my $prog = shift @_;
 
 	foreach ( split /:/, $ENV{'PATH'} ) {
 		if ( -x "$_/$prog" ) {
-			return 1;
+			return "$_/$prog";
 		}
 	}
 	return 0;
