@@ -8,4 +8,4 @@ graphical interface
 
 1.4
 posix capabilities
-	- detect capa changes : rpm -V => P
+	- rollback
