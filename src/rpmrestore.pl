@@ -111,9 +111,12 @@ sub get_rpm_infos($$) {
 	my $queryformat =
 
 #  tab   0               1                  2                3               4            5            6          7
-"[%{FILENAMES} %6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILEMD5S} $query_cap\n]";
+"[%{FILENAMES} %6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILEMD5S} $query_cap\\n]";
+	my $cmd = "rpm -q --queryformat \"$queryformat\" $package";
+	debug($cmd);
+
 	## no critic ( ProhibitBacktickOperators );
-	my @info = `rpm -q --queryformat $queryformat $package`;
+	my @info = `$cmd`;
 	## use critic;
 
 	my %h;
@@ -878,12 +881,13 @@ sub check_capability() {
 	my $cmd    = 'rpm --querytags';
 	my @output = `$cmd`;
 	foreach my $tag (@output) {
-		if ( $tag =~ m /CAPABILITY/ ) {
+		if ( $tag =~ m/CAPABILITY/ ) {
 			$opt_capability = 1;
 			last;
 		}
 	}
 
+	debug("no rpm capability");
 	# it is not necessary to go further
 	return 0 unless $opt_capability;
 
@@ -1064,6 +1068,8 @@ if ( !@check ) {
 	exit;
 }
 my %infos = get_rpm_infos( $opt_package, $opt_flag_cap );
+
+print Dumper(%infos) if ($opt_verbose);
 
 my $nb_changes = 0;
 CHANGE: foreach my $elem (@check) {
