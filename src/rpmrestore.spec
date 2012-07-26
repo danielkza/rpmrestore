@@ -66,6 +66,9 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc test_rpmrestore.pl
 
 %changelog
+* Tue Jul 27 2012 Eric Gerbier <gerbier@users.sourceforge.net> 1.4
+- add capability option
+
 * Tue Nov 13 2007 Eric Gerbier <gerbier@users.sourceforge.net> 1.3
 - standardize man pages
 - shell independance : can now work with c-shell*
