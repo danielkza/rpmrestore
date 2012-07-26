@@ -135,12 +135,12 @@ if ( $> == 0 ) {
 		my $filecap = '/usr/bin/ping';
 
 		# no changes
-		$out = `$cmd -capability -f $filecap 2>&1`;
+		$out = `$cmd -capability -n -f $filecap 2>&1`;
 		like( $out, qr/0 changes detected/, 'capability no changes' );
 
 		# remove capability
 		system "setcap -r $filecap";
-		$out = `$cmd -capability -f $filecap 2>&1`;
+		$out = `$cmd -capability -n -f $filecap 2>&1`;
 		like( $out, qr/$filecap capability orig/, 'capability changes' );
 
 		# restore
@@ -148,7 +148,7 @@ if ( $> == 0 ) {
 		like( $out, qr/change capability on $filecap/, 'restore capability' );
 
 		# no changes
-		$out = `$cmd -capability -f $filecap 2>&1`;
+		$out = `$cmd -capability -n -f $filecap 2>&1`;
 		like( $out, qr/0 changes detected/, 'capability no changes' );
 	}
 
