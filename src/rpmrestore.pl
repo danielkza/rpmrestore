@@ -107,7 +107,7 @@ sub get_rpm_infos($) {
 	# use space as field separator : see below
 	# md5 is the last field because it may not exists (directories)
 	# same for capability
-	my $query_cap = $flag_cap ? '%{CAPABILITY}' : q{};
+	my $query_cap = $flag_cap ? '%{FILECAPS}' : q{};
 
 	my $queryformat =
 
@@ -955,7 +955,7 @@ sub check_rpm_capability() {
 	my $cmd    = 'rpm --querytags';
 	my @output = `$cmd`;
 	foreach my $tag (@output) {
-		if ( $tag =~ m/CAPABILITY/ ) {
+		if ( $tag =~ m/FILECAPS/ ) {
 			$opt_capability = 1;
 			last;
 		}
