@@ -404,9 +404,44 @@ sub rollback_time($$$$$$$) {
 	return $nb_rollback;
 }
 ###############################################################################
+sub rollback_cap($$$$$$$) {
+	my $opt_batch  = shift @_;
+	my $opt_dryrun = shift @_;
+	my $fic        = shift @_;
+	my $line       = shift @_;
+	my $to         = shift @_;
+	my $from       = shift @_;
+	my $cur_stat   = shift @_;
+
+	my $nb_rollback = 0;
+
+	# if rollback entry exist, setcap/getcap should exists but ...
+	if ( check_capability_tools() ) {
+		my $cur_cap = getcap($fic);
+
+		my $to_cap = $to;
+		if ( $to_cap != $cur_cap ) {
+			warning(
+"current capability $cur_cap does not match rollback value : $to_cap (line $line)"
+			);
+		}
+		else {
+			my $action = sub { change_mode( $from, $fic ); };
+			ask( $opt_dryrun, $opt_batch, $action, $fic, 'capability', $from,
+				$to );
+			$nb_rollback++;
+		}
+	}
+	else {
+		warning("sorry : could not find getcap/setcap tools");
+	}
+
+	return $nb_rollback;
+}
+###############################################################################
 # use log file to revert change
 # it looks very similar to main code
-sub rollback($$$$$$$) {
+sub rollback($$$$$$$$) {
 	my $log        = shift @_;
 	my $opt_batch  = shift @_;
 	my $opt_dryrun = shift @_;
@@ -414,6 +449,7 @@ sub rollback($$$$$$$) {
 	my $opt_group  = shift @_;
 	my $opt_mode   = shift @_;
 	my $opt_time   = shift @_;
+	my $opt_cap    = shift @_;
 
 	## no critic (RequireBriefOpen)
 	my $fh_roll;
@@ -472,6 +508,14 @@ sub rollback($$$$$$$) {
 				if ($opt_mode) {
 					$nb_rollback +=
 					  rollback_mode( $opt_batch, $opt_dryrun, $fic, $line, $to,
+						$from, $cur_stat );
+
+				}
+			}
+			elsif ( $param eq 'capability' ) {
+				if ($opt_mode) {
+					$nb_rollback +=
+					  rollback_cap( $opt_batch, $opt_dryrun, $fic, $line, $to,
 						$from, $cur_stat );
 
 				}
@@ -1046,8 +1090,8 @@ sub init($$) {
 
 	if ($opt_rollback) {
 		rollback(
-			$opt_rollback,   $opt_batch,     $opt_dryrun, $opt_flag_user,
-			$opt_flag_group, $opt_flag_mode, $opt_flag_time
+			$opt_rollback,   $opt_batch,     $opt_dryrun,    $opt_flag_user,
+			$opt_flag_group, $opt_flag_mode, $opt_flag_time, $opt_flag_cap,
 		);
 
 		exit;
