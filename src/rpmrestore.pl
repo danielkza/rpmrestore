@@ -1196,7 +1196,7 @@ Rpmrestore can display detailed changes and can restore install attributes.
 
 =head1 SYNOPSIS
 
-rpmrestore [options] [ target ]
+rpmrestore.pl [options] [ target ]
 
 target:
 
