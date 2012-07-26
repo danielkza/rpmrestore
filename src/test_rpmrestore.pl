@@ -24,6 +24,18 @@ use warnings;
 use Test::More qw(no_plan);
 use Data::Dumper;
 
+###############################################################################
+sub search_command($) {
+	my $prog = shift @_;
+
+	foreach ( split /:/, $ENV{'PATH'} ) {
+		if ( -x "$_/$prog" ) {
+			return "$_/$prog";
+		}
+	}
+	return 0;
+}
+###############################################################################
 # arguments test
 my $cmd = './rpmrestore.pl';
 
@@ -114,6 +126,33 @@ if ( $> == 0 ) {
 	like( $out, qr/1 changes applied/, 'interactive changes' );
 
 	unlink $log;
+
+	# capability (works on fedora)
+	# test for getcap
+	my $getcap = search_command('setcap');
+	if ($getcap) {
+		# will work on ping
+		my $filecap = '/usr/bin/ping';
+
+		# no changes
+		$out = `$cmd -capability -f $filecap 2>&1`;
+		like( $out, qr/0 changes detected/, 'capability no changes' );
+
+		# remove capability
+		system "setcap -r $filecap";
+		$out = `$cmd -capability -f $filecap 2>&1`;
+		like( $out, qr/$filecap capability orig/, 'capability changes' );
+
+		# restore
+		$out = `$cmd -capability -b -f $filecap 2>&1`;
+		like( $out, qr/change capability on $filecap/, 'restore capability' );
+
+		# no changes
+		$out = `$cmd -capability -f $filecap 2>&1`;
+		like( $out, qr/0 changes detected/, 'capability no changes' );
+	}
+
+
 }
 else {
 	diag('you should be root to run other tests');
