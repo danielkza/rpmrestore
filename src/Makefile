@@ -70,7 +70,6 @@ all: install
 install : $(DOC) $(MANPAGES1) $(SCRIPTS)
 	mkdir -p              $(BINDIR)
 	install -m 755 $(SCRIPTS) $(BINDIR)
-	$(make_links)
 	mkdir -p                $(MAN1DIR)
 	install -m 644 ${MANPAGES1} $(MAN1DIR)
 	mkdir -p                    $(DOCDIR)
