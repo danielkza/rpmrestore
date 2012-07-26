@@ -10,7 +10,8 @@ VERSION=$(shell grep Version rpmrestore.lsm | awk '{print $$2}')
 BINDIR = $(DESTDIR)/usr/bin
 MANDIR = $(DESTDIR)/usr/share/man
 MAN1DIR = $(MANDIR)/man1
-# on some distribution it is $(PACKAGE) (mandriva) on other $(PACKAGE)-$(VERSION) (fedora)
+# on some distribution it is $(PACKAGE)-$(VERSION) (fedora), on others $(PACKAGE) (mandriva)
+# we force it with a define in rpm target to be able to build on any host the same way
 DOCDIR=$(DESTDIR)/usr/share/doc/$(PACKAGE)-$(VERSION)
 
 DOC = Authors Changelog COPYING NEWS Todo $(PACKAGE).lsm $(PACKAGE).spec Makefile Readme rpmrestorerc.sample test_rpmrestore.pl
@@ -104,7 +105,7 @@ dist : $(DOC) man $(SCRIPTS) expand
 
 # build rpm package
 rpm : dist
-	rpmbuild -ta --sign $(PACKAGE)-$(VERSION).tar.gz
+	rpmbuild -ta --sign --define '_docdir_fmt %%{NAME}-%%{VERSION}' $(PACKAGE)-$(VERSION).tar.gz
 
 # clean temp files
 clean : unexpand
