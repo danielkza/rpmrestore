@@ -588,6 +588,14 @@ sub change_time($$) {
 	return;
 }
 ###############################################################################
+sub change_capa($$) {
+	my $new_capa  = shift @_;
+	my $filename = shift @_;
+
+	system "setcap $new_capa $filename";
+	return;
+}
+###############################################################################
 sub display_user($$$$$) {
 	my $rpm_info   = shift @_;
 	my $cur_stat   = shift @_;
@@ -716,6 +724,23 @@ sub display_checksum($$$$$) {
 	return;
 }
 ###############################################################################
+sub display_capability($$$$$) {
+	my $rpm_info   = shift @_;
+	my $cur_stat   = shift @_;
+	my $filename   = shift @_;
+	my $opt_dryrun = shift @_;
+	my $opt_batch  = shift @_;
+
+	my $rpm_cap = $rpm_info->{'capability'};
+	my $h_capa = `getcap $filename`;
+
+	my $action = sub { change_capa( $rpm_cap, $filename ); };
+	ask( $opt_dryrun, $opt_batch, $action, $filename, 'capability', $rpm_cap,
+		$h_capa );
+
+	return;
+}
+###############################################################################
 sub open_log($) {
 	my $opt_log = shift @_;
 
@@ -817,6 +842,11 @@ sub trait_elem($$$$) {
 	}
 	if ( ( ${ $r_opt->{'md5'} } ) and ( $change =~ m/5/ ) ) {
 		display_checksum( $rpm_info, $cur_stat, $filename, $opt_dry_run,
+			$opt_batch );
+		$nb_changes++;
+	}
+	if ( ( ${ $r_opt->{'capability'} } ) and ( $change =~ m/P/ ) ) {
+		display_capability( $rpm_info, $cur_stat, $filename, $opt_dry_run,
 			$opt_batch );
 		$nb_changes++;
 	}
