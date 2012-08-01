@@ -70,12 +70,13 @@ all: install
 
 # install perl scripts
 install : $(DOC) $(MANPAGES1) $(SCRIPTS)
-	mkdir -p              $(BINDIR)
+	mkdir -p		$(BINDIR)
 	install -m 755 $(SCRIPTS) $(BINDIR)
 	mkdir -p                $(MAN1DIR)
 	install -m 644 ${MANPAGES1} $(MAN1DIR)
+	mkdir -p		$(LOGETC)
 	install -m 644 rpmrestorerc.sample $(LOGETC)/rpmrestorerc
-	mkdir -p                    $(DOCDIR)
+	mkdir -p		$(DOCDIR)
 	install -m 644 ${DOC}	$(DOCDIR)
 
 uninstall :
