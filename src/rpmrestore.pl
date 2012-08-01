@@ -872,7 +872,9 @@ sub check_file($) {
 		return $opt_package;
 	}
 	else {
-		pod2usage("can not find $opt_file file");
+
+		debug("can not find $opt_file file");
+		return; 
 	}
 
 	return;
@@ -1098,12 +1100,27 @@ sub init($$) {
 		exit;
 	}
 
+	# deprecated option -f 
 	if ($opt_file) {
 		$opt_package = check_file($opt_file);
 	}
 
-	if ( !$opt_package ) {
-		pod2usage('missing rpm package name');
+	# deprecated : is set by -p or -f options
+	if ( $opt_package ) {
+		return;
+	}
+
+	# new system : give package or file as it
+	if ( $#ARGV != 0 ) {
+		pod2usage('need a target : package name');
+	}
+	my $arg = $ARGV[0];
+	my $test_package = check_file($arg);
+	if ( $test_package) {
+		$opt_file = $arg;
+		$opt_package = $test_package;
+	} else {
+		 $opt_package = $arg;
 	}
 
 	return;
@@ -1112,7 +1129,7 @@ sub init($$) {
 ###############################################################################
 #                             main
 ###############################################################################
-my $version = '1.4';
+my $version = '1.5';
 
 $OUTPUT_AUTOFLUSH = 1;
 
@@ -1201,9 +1218,9 @@ rpmrestore.pl [options] [ target ]
 
 target:
 
-   -package package	apply on designed package
-   -file filename	apply on designed file
-   -rollback logfile	restore attributes from logfile (written by -log)
+   file|package		file or package
+   -package package	(deprecated) apply on designed package
+   -file filename	(deprecated) apply on designed file
 
 options:
 
@@ -1215,6 +1232,7 @@ options:
    -batch		batch mode (ask no questions)
    -n, --dry-run	do not perform any change
    -log logfile		log action in logfile
+   -rollback logfile	restore attributes from logfile (written by -log)
 
   -all		apply on all attributes
   -user		apply on user
@@ -1280,11 +1298,11 @@ The program write the changes in designed log file. This file can be used for ro
 
 =item B<-package>
 
-The program works on designed installed rpm package.
+(deprecated) The program works on designed installed rpm package.
 
 =item B<-file>
 
-The program works on designed file, which should be a part from a rpm package.
+(deprecated) The program works on designed file, which should be a part from a rpm package.
 
 =item B<-rollback>
 
@@ -1330,29 +1348,29 @@ You can look getcap/setcap man pages for more informations.
 
 =head1 USAGE
 
-the rpm command to control changes 
+the rpm command to control changes  on rpm package
  
   rpm -V rpm
 
 same effect (just display) but more detailed (display values)
 
-  rpmrestore.pl -n -package rpm
+  rpmrestore.pl -n rpm
 
 interactive change mode, only on time attribute
 
-  rpmrestore.pl -time -package rpm
+  rpmrestore.pl -time rpm
 
 interactive change mode, on all attributes except time attribute
 
-  rpmrestore.pl -all -notime -package rpm
+  rpmrestore.pl -all -notime rpm
 
 batch change mode (DANGEROUS) on mode attribute with log file
 
-  rpmrestore.pl -batch -package rpm -log /tmp/log
+  rpmrestore.pl -batch -log /tmp/log rpm
 
 interactive change of mode attribute on file /etc/motd
 
-  rpmrestore.pl -mode -file /etc/motd
+  rpmrestore.pl -mode /etc/motd
 
 interactive rollback from /tmp/log
 

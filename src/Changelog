@@ -1,3 +1,6 @@
+2012-08-01 Eric Gerbier <gerbier@users.sourceforge.net> 1.5
+	* change api to be more natural (deprecated -f/-p)
+
 2012-07-27 Eric Gerbier <gerbier@users.sourceforge.net> 1.4
 	* fix some new perlcritic warnings
 	* add capability option
