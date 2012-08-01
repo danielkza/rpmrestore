@@ -12,16 +12,16 @@
 # - all parameter have the same name as command line arguments, without dash
 
 # no verbose mode
-verbose = 0
+#verbose = 0
 
 # interactive mode
-batch = 0
+#batch = 0
 
 # dryrun mode
-dry-run = 1
+#dry-run = 0
 
 # log file
-log = /tmp/rpmrestore.log
+#log = /tmp/rpmrestore.log
 
 # attributes
 # set to 1 to use it
