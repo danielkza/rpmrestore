@@ -8,6 +8,7 @@ SHELL = /bin/sh
 VERSION=$(shell grep Version rpmrestore.lsm | awk '{print $$2}')
 
 BINDIR = $(DESTDIR)/usr/bin
+LOGETC = $(DESTDIR)/etc/
 MANDIR = $(DESTDIR)/usr/share/man
 MAN1DIR = $(MANDIR)/man1
 # on some distribution it is $(PACKAGE)-$(VERSION) (fedora), on others $(PACKAGE) (mandriva)
@@ -73,12 +74,14 @@ install : $(DOC) $(MANPAGES1) $(SCRIPTS)
 	install -m 755 $(SCRIPTS) $(BINDIR)
 	mkdir -p                $(MAN1DIR)
 	install -m 644 ${MANPAGES1} $(MAN1DIR)
+	install -m 644 rpmrestorerc.sample $(LOGETC)/rpmrestorerc
 	mkdir -p                    $(DOCDIR)
 	install -m 644 ${DOC}	$(DOCDIR)
 
 uninstall :
 	cd $(BINDIR) && rm $(SCRIPTS) $(PROGS)
 	cd $(MAN1DIR) && rm ${MANPAGES1}
+	rm -f $(LOGETC)/rpmrestorerc
 	rm -rf $(DOCDIR)
 
 ################################################################################
