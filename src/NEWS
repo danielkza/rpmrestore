@@ -1,3 +1,9 @@
+			1.5 version
+			-------------
+new features :
+- new api, (options -p/-f are deprecated)
+- add global configuration file /etc/rpmrestorerc
+----------------------------------------------------------------
 			1.4 version
 			-------------
 new features : add capability option
