@@ -41,7 +41,7 @@ my $cmd = './rpmrestore.pl';
 
 # 1 no arguments
 my $out = `$cmd 2>&1`;
-like( $out, qr/missing rpm package name/, 'no parameter' );
+like( $out, qr/need a target/, 'no parameter' );
 
 # 2 version
 $out = `$cmd --version 2>&1`;
@@ -61,14 +61,14 @@ like( $out, qr/package does not exists/, 'no package' );
 
 # 6 bad file name
 $out = `$cmd -f tototo 2>&1`;
-like( $out, qr/can not find .* file/, 'no file' );
+like( $out, qr/is not a valid file/, 'no file' );
 
 # 7 file not from package
 $out = `$cmd -f Todo 2>&1`;
 like( $out, qr/is not owned by any package/, 'not from rpm' );
 
 # 8 no changes on package
-$out = `$cmd -p rpmrestore 2>&1`;
+$out = `$cmd rpmrestore 2>&1`;
 like( $out, qr/0 changes detected/, 'package no changes' );
 
 # we work on rpm package, so the rpm should exist
