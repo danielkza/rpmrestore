@@ -135,6 +135,7 @@ sub get_rpm_infos($) {
 			md5   => $tab[6],
 		);
 		if ($flag_cap) {
+
 			# because rpm return such "= cap_net_raw+ep"
 			$h2{capability} = $tab[8];
 		}
@@ -843,8 +844,10 @@ sub open_log($) {
 	return;
 }
 ###############################################################################
-sub check_file($) {
-	my $opt_file = shift @_;
+# check if given name is a file from an rpm package
+sub check_file($$) {
+	my $opt_file = shift @_;    # given name
+	my $flag_old = shift @_;    # called from old deprecated syntax
 
 	# check if file exists
 	if ( -e $opt_file ) {
@@ -862,19 +865,27 @@ sub check_file($) {
 		my @rep = split /\s/, $opt_package;
 		## no critic ( ProhibitParensWithBuiltins );
 		if ( scalar(@rep) == 1 ) {
-			info("package is $opt_package");
+			info("package of $opt_file is $opt_package");
+			return $opt_package;
 		}
 		else {
-			pod2usage("$opt_package is not owned by any package");
+			pod2usage("$opt_file is not owned by any package");
 		}
 		## use critic;
 
-		return $opt_package;
+	}
+	elsif ($flag_old) {
+
+		# not a file
+		# this is an error
+		pod2usage("$opt_file is not a valid file");
 	}
 	else {
 
+		# opt_file is not a file
+		# maybe a package ?
 		debug("can not find $opt_file file");
-		return; 
+		return;
 	}
 
 	return;
@@ -1100,13 +1111,14 @@ sub init($$) {
 		exit;
 	}
 
-	# deprecated option -f 
+	# deprecated option -f
 	if ($opt_file) {
-		$opt_package = check_file($opt_file);
+		$opt_package = check_file( $opt_file, 1 );
 	}
 
-	# deprecated : is set by -p or -f options
-	if ( $opt_package ) {
+	if ($opt_package) {
+
+		# deprecated : opt_package was set by -p or -f options
 		return;
 	}
 
@@ -1115,12 +1127,17 @@ sub init($$) {
 		pod2usage('need a target : package name');
 	}
 	my $arg = $ARGV[0];
-	my $test_package = check_file($arg);
-	if ( $test_package) {
-		$opt_file = $arg;
+	my $test_package = check_file( $arg, 0 );
+	if ($test_package) {
+
+		# seems to be a valid file from a package
+		$opt_file    = $arg;
 		$opt_package = $test_package;
-	} else {
-		 $opt_package = $arg;
+	}
+	else {
+
+		# may be a package
+		$opt_package = $arg;
 	}
 
 	return;
