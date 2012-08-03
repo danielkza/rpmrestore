@@ -1,7 +1,7 @@
 			1.5 version
 			-------------
 new features :
-- new api, (options -p/-f are deprecated)
+- change api to be more natural (-f/-p otions are deprecated)
 - add global configuration file /etc/rpmrestorerc
 ----------------------------------------------------------------
 			1.4 version

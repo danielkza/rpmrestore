@@ -67,8 +67,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 
 %changelog
 * Tue Aug 03 2012 Eric Gerbier <gerbier@users.sourceforge.net> 1.5
-- add /etc/rpmrestorerc
-- change api to be more natural (deprecated -f/-p)
+- change api to be more natural (-f/-p otions are deprecated)
+- add global configuration file /etc/rpmrestorerc
 
 * Tue Jul 27 2012 Eric Gerbier <gerbier@users.sourceforge.net> 1.4
 - add capability option
