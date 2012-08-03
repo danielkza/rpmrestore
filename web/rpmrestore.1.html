@@ -84,9 +84,9 @@
 
   <p>target:</p>
   <pre>
-   -package package     apply on designed package
-   -file filename       apply on designed file
-   -rollback logfile    restore attributes from logfile (written by -log)
+   file|package         file or package
+   -package package     (deprecated) apply on designed package
+   -file filename       (deprecated) apply on designed file
 </pre>
 
   <p>options:</p>
@@ -100,6 +100,7 @@
    -batch               batch mode (ask no questions)
    -n, --dry-run        do not perform any change
    -log logfile         log action in logfile
+   -rollback logfile    restore attributes from logfile (written by -log)
 </pre>
   <pre>
   -all          apply on all attributes
@@ -204,15 +205,16 @@
     "package2"><strong>-package</strong></a></strong></dt>
 
     <dd>
-      <p>The program works on designed installed rpm package.</p>
+      <p>(deprecated) The program works on designed installed rpm
+      package.</p>
     </dd>
 
     <dt><strong><a name="file2" class="item" id=
     "file2"><strong>-file</strong></a></strong></dt>
 
     <dd>
-      <p>The program works on designed file, which should be a part
-      from a rpm package.</p>
+      <p>(deprecated) The program works on designed file, which
+      should be a part from a rpm package.</p>
     </dd>
 
     <dt><strong><a name="rollback2" class="item" id=
@@ -293,7 +295,7 @@
 
   <h1><a name="usage" id="usage">USAGE</a></h1>
 
-  <p>the rpm command to control changes</p>
+  <p>the rpm command to control changes on rpm package</p>
   <pre>
 
   rpm -V rpm
@@ -302,29 +304,29 @@
   <p>same effect (just display) but more detailed (display
   values)</p>
   <pre>
-  rpmrestore.pl -n -package rpm
+  rpmrestore.pl -n rpm
 </pre>
 
   <p>interactive change mode, only on time attribute</p>
   <pre>
-  rpmrestore.pl -time -package rpm
+  rpmrestore.pl -time rpm
 </pre>
 
   <p>interactive change mode, on all attributes except time
   attribute</p>
   <pre>
-  rpmrestore.pl -all -notime -package rpm
+  rpmrestore.pl -all -notime rpm
 </pre>
 
   <p>batch change mode (DANGEROUS) on mode attribute with log
   file</p>
   <pre>
-  rpmrestore.pl -batch -package rpm -log /tmp/log
+  rpmrestore.pl -batch -log /tmp/log rpm
 </pre>
 
   <p>interactive change of mode attribute on file /etc/motd</p>
   <pre>
-  rpmrestore.pl -mode -file /etc/motd
+  rpmrestore.pl -mode /etc/motd
 </pre>
 
   <p>interactive rollback from /tmp/log</p>
