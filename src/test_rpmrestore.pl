@@ -50,6 +50,7 @@ like( $out, qr/need a target/, 'no parameter' );
 
 # 2 version
 $out = `$cmd --version 2>&1`;
+## no critic (ProhibitEscapedMetacharacters)
 like( $out, qr/rpmrestore\.pl version/, 'version' );
 
 # 3 help
@@ -104,7 +105,7 @@ like( $out, qr/0 changes detected/, 'file no changes (new)' );
 if ( $EFFECTIVE_USER_ID == 0 ) {
 
 	# change mtime
-	system("touch $file");
+	system "touch $file";
 
 	# 14 no changes on attribute
 	$out = `$cmd -mode -n -f $file 2>&1`;
@@ -188,12 +189,42 @@ test if restore changes
 test of rollback
 test interactive mode
 
+=head1 USAGE
+
+./test_rpmrestore.pl
+
+=head1 REQUIRED ARGUMENTS
+
+none
+
+=head1 OPTIONS
+
+none
+
+=head1 DIAGNOSTICS
+
+regression tests on rpmrestore
+
+=head1 EXIT STATUS
+
+=head1 CONFIGURATION
+
+use rpmorphanrc files
+
+=head1 DEPENDENCIES
+
+rpmrestore rpm perl
+
+=head1 INCOMPATIBILITIES
+
 =head1 SEE ALSO
 
 =for man
 \fIrpmrestore\fR\|(1) for rpmrestore call
 
-=head1 COPYRIGHT
+=head1 BUGS AND LIMITATIONS
+
+=head1 LICENSE AND COPYRIGHT
 
 Copyright (C) 2006 by Eric Gerbier
 This program is free software; you can redistribute it and/or modify
