@@ -177,7 +177,7 @@ sub ask($$$$$$$) {
 			my $rep = lc <STDIN>;
 			chomp $rep;
 
-			## no critic ( PostfixControls );
+			# no critic ( PostfixControls );
 			return unless ( $rep eq 'y' );
 			## use critic;
 		}
@@ -213,7 +213,7 @@ sub writelog($$$$) {
 	my $orig     = shift @_;
 	my $current  = shift @_;
 
-	## no critic ( PostfixControls );
+	# no critic ( PostfixControls );
 	print {$fh_log} "$filename $param from $current to $orig\n" if ($fh_log);
 	## use critic;
 	return;
@@ -234,6 +234,8 @@ sub set_val($$) {
 sub get_val($) {
 	my $val = shift @_;
 
+	## no critic (ProhibitEscapedMetacharacters)
+	# look like : 1267730930 (20100304202850)
 	if ( $val =~ m/^(\d+) \(([^)])/ ) {
 		my $raw_val   = $1;
 		my $human_val = $2;
@@ -435,7 +437,7 @@ sub rollback_cap($$$$$$$) {
 		}
 	}
 	else {
-		warning("sorry : could not find getcap/setcap tools");
+		warning('sorry : could not find getcap/setcap tools');
 	}
 
 	return $nb_rollback;
@@ -607,7 +609,7 @@ sub change_user($$) {
 	my $new_uid  = shift @_;
 	my $filename = shift @_;
 
-	## no critic (ProhibitMagicNumbers)
+	# no critic (ProhibitMagicNumbers)
 	chown $new_uid, -1, $filename;
 	return;
 }
@@ -616,7 +618,7 @@ sub change_group($$) {
 	my $new_gid  = shift @_;
 	my $filename = shift @_;
 
-	## no critic (ProhibitMagicNumbers)
+	# no critic (ProhibitMagicNumbers)
 	chown -1, $new_gid, $filename;
 	return;
 }
@@ -863,7 +865,8 @@ sub check_file($$) {
 		# so another way is : a good answer is only one package,
 		# so only one word
 		my @rep = split /\s/, $opt_package;
-		## no critic ( ProhibitParensWithBuiltins );
+
+		# no critic ( ProhibitParensWithBuiltins );
 		if ( scalar(@rep) == 1 ) {
 			info("package of $opt_file is $opt_package");
 			return $opt_package;
@@ -1168,7 +1171,7 @@ if ( $CHILD_ERROR != 0 ) {
 
 # LC_ALL is set to POSIX
 # to avoid any localisation problem with test in CHANGE loop
-## no critic (RequireLocalizedPunctuationVars)
+# no critic (RequireLocalizedPunctuationVars)
 $ENV{'LC_ALL'} = 'POSIX';
 ## no critic ( ProhibitBacktickOperators );
 my @check = `rpm -V $opt_package 2>/dev/null`;
