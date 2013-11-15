@@ -174,7 +174,7 @@ sub ask($$$$$$$) {
 			# interactive mode
 			# ask to confirm
 			print 'want to restore (y/n) ? ';
-			my $rep = lc <>;
+			my $rep = lc <STDIN>;
 			chomp $rep;
 
 			## no critic ( PostfixControls );
