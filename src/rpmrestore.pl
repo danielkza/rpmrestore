@@ -856,7 +856,7 @@ sub check_file($$) {
 
 		# get rpm from file
 		## no critic ( ProhibitBacktickOperators );
-		my $opt_package = `rpm -qf --queryformat "%{NAME}" $opt_file `;
+		my $opt_package = `rpm -qf --queryformat "%{NAME} " $opt_file `;
 		## use critic;
 
 		# test result
@@ -870,6 +870,9 @@ sub check_file($$) {
 		if ( scalar(@rep) == 1 ) {
 			info("package of $opt_file is $opt_package");
 			return $opt_package;
+		}
+		elsif ( scalar(@rep) > 1 ) {
+			pod2usage("$opt_file is owned by several packages : $opt_package");
 		}
 		else {
 			pod2usage("$opt_file is not owned by any package");
