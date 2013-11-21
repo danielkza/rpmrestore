@@ -7,7 +7,7 @@
   <meta name="generator" content=
   "HTML Tidy for Linux (vers 25 March 2009), see www.w3.org" />
 
-  <title>rpmrestore.pl - restore attributes from rpm
+  <title>rpmrestore_all.pl - restore all attributes from rpm
   database</title>
   <meta http-equiv="content-type" content=
   "text/html; charset=utf-8" />
@@ -19,9 +19,9 @@
   summary="">
     <tr>
       <td class="block" style="background-color: #cccccc" valign=
-      "middle"><big><strong><span class="block">&nbsp;rpmrestore.pl
-      - restore attributes from rpm
-      database</span></strong></big></td>
+      "middle"><big><strong><span class=
+      "block">&nbsp;rpmrestore_all.pl - restore all attributes from
+      rpm database</span></strong></big></td>
     </tr>
   </table><!-- INDEX BEGIN -->
 
@@ -66,7 +66,8 @@
 
   <h1><a name="name" id="name">NAME</a></h1>
 
-  <p>rpmrestore.pl - restore attributes from rpm database</p>
+  <p>rpmrestore_all.pl - restore all attributes from rpm
+  database</p>
   <hr />
 
   <h1><a name="description" id="description">DESCRIPTION</a></h1>
@@ -74,20 +75,14 @@
   <p>The rpm database store user, group, time, mode for all files,
   and offer a command (rpm -V ) to display a summary of the changes
   between install state (database) and current disk state.
-  Rpmrestore can display detailed changes and can restore install
-  attributes.</p>
+  rpmrestore_all will allow to display changes and restores install
+  attributes for all installed packages, using rpmrestore.pl
+  tool.</p>
   <hr />
 
   <h1><a name="synopsis" id="synopsis">SYNOPSIS</a></h1>
 
-  <p>rpmrestore.pl [options] [ target ]</p>
-
-  <p>target:</p>
-  <pre>
-   file|package         file or package
-   -package package     (deprecated) apply on designed package
-   -file filename       (deprecated) apply on designed file
-</pre>
+  <p>rpmrestore_all.pl [options]</p>
 
   <p>options:</p>
   <pre>
@@ -116,35 +111,6 @@
 
   <h1><a name="required_arguments" id="required_arguments">REQUIRED
   ARGUMENTS</a></h1>
-
-  <p>you should provide a target, to work on</p>
-
-  <p>this can be</p>
-
-  <dl>
-    <dt><strong><a name="package" class="item" id=
-    "package"><strong>-package</strong></a></strong></dt>
-
-    <dd>
-      <p>The program works on designed installed rpm package.</p>
-    </dd>
-
-    <dt><strong><a name="file" class="item" id=
-    "file"><strong>-file</strong></a></strong></dt>
-
-    <dd>
-      <p>The program works on designed file, which should be a part
-      from a rpm package.</p>
-    </dd>
-
-    <dt><strong><a name="rollback" class="item" id=
-    "rollback"><strong>-rollback</strong></a></strong></dt>
-
-    <dd>
-      <p>The program works from designed log file, and rollback
-      (revert) the changes.</p>
-    </dd>
-  </dl>
   <hr />
 
   <h1><a name="options" id="options">OPTIONS</a></h1>
@@ -200,30 +166,6 @@
     <dd>
       <p>The program write the changes in designed log file. This
       file can be used for rollback.</p>
-    </dd>
-
-    <dt><strong><a name="package2" class="item" id=
-    "package2"><strong>-package</strong></a></strong></dt>
-
-    <dd>
-      <p>(deprecated) The program works on designed installed rpm
-      package.</p>
-    </dd>
-
-    <dt><strong><a name="file2" class="item" id=
-    "file2"><strong>-file</strong></a></strong></dt>
-
-    <dd>
-      <p>(deprecated) The program works on designed file, which
-      should be a part from a rpm package.</p>
-    </dd>
-
-    <dt><strong><a name="rollback2" class="item" id=
-    "rollback2"><strong>-rollback</strong></a></strong></dt>
-
-    <dd>
-      <p>The program works from designed log file, and rollback
-      (revert) the changes.</p>
     </dd>
 
     <dt><strong><a name="all" class="item" id=
@@ -296,48 +238,21 @@
 
   <h1><a name="usage" id="usage">USAGE</a></h1>
 
-  <p>the rpm command to control changes on rpm package</p>
-  <pre>
-
-  rpm -V rpm
-</pre>
-
-  <p>same effect (just display) but more detailed (display
-  values)</p>
-  <pre>
-  rpmrestore.pl -n rpm
-</pre>
-
   <p>interactive change mode, only on time attribute</p>
   <pre>
-  rpmrestore.pl -time rpm
+  rpmrestore_all.pl -time
 </pre>
 
   <p>interactive change mode, on all attributes except time
   attribute</p>
   <pre>
-  rpmrestore.pl -all -notime rpm
+  rpmrestore_all.pl -all -notime
 </pre>
 
   <p>batch change mode (DANGEROUS) on mode attribute with log
   file</p>
   <pre>
-  rpmrestore.pl -batch -log /tmp/log rpm
-</pre>
-
-  <p>interactive change of mode attribute on file /etc/motd</p>
-  <pre>
-  rpmrestore.pl -mode /etc/motd
-</pre>
-
-  <p>interactive rollback from /tmp/log</p>
-  <pre>
-  rpmrestore.pl -rollback /tmp/log
-</pre>
-
-  <p>batch rollback user changes from /tmp/log</p>
-  <pre>
-  rpmrestore.pl -batch -user -rollback /tmp/log
+  rpmrestore_all.pl -batch -log /tmp/log
 </pre>
   <hr />
 
@@ -433,9 +348,9 @@
   summary="">
     <tr>
       <td class="block" style="background-color: #cccccc" valign=
-      "middle"><big><strong><span class="block">&nbsp;rpmrestore.pl
-      - restore attributes from rpm
-      database</span></strong></big></td>
+      "middle"><big><strong><span class=
+      "block">&nbsp;rpmrestore_all.pl - restore all attributes from
+      rpm database</span></strong></big></td>
     </tr>
   </table>
 </body>
