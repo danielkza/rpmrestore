@@ -1264,6 +1264,7 @@ options:
   -time		apply on mtime
   -size		apply on size (just display)
   -md5		apply on md5 (just display)
+  -capability	apply on capabilities
 
 =head1 REQUIRED ARGUMENTS
 
