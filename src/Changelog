@@ -1,7 +1,11 @@
+2013-11-21 Eric Gerbier <gerbier@users.sourceforge.net> 1.6
+	* add rpmrestore_all.pl tool
+	* bugfix interactive mode
+	* check if file is owned by several packages
+
 2012-08-03 Eric Gerbier <gerbier@users.sourceforge.net> 1.5
 	* change api to be more natural (-f/-p otions are deprecated)
 	* add global configuration file /etc/rpmrestorerc
-
 
 2012-07-27 Eric Gerbier <gerbier@users.sourceforge.net> 1.4
 	* fix some new perlcritic warnings
