@@ -1,4 +1,4 @@
-%define VERSION 1.5
+%define VERSION 1.6
 Summary: rpmrestore restore file attributes from rpm database
 # The Summary: line should be expanded to about here -----^
 Summary(fr): rpmrestore restore les attributs d'installation
@@ -51,6 +51,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %defattr(-,root,root)
 %dir %{_bindir}
 %{_bindir}/rpmrestore.pl
+%{_bindir}/rpmrestore_all.pl
 %dir %{_mandir}/man1
 %doc %{_mandir}/man1/rpmrestore.1*
 %config(noreplace) /etc/rpmrestorerc
@@ -66,6 +67,11 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc test_rpmrestore.pl
 
 %changelog
+* Wed Nov 21 2013 Eric Gerbier <gerbier@users.sourceforge.net> 1.6
+- add rpmrestore_all.pl tool
+- bugfix interactive mode
+- check if file is owned by several packages
+
 * Tue Aug 03 2012 Eric Gerbier <gerbier@users.sourceforge.net> 1.5
 - change api to be more natural (-f/-p otions are deprecated)
 - add global configuration file /etc/rpmrestorerc
