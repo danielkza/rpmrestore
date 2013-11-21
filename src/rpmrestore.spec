@@ -26,11 +26,15 @@ The rpm database store user, group, time, mode for all files.
 Rpmrestore allow to display the change between the current state and the rpm 
 database. Il also allow to restore this attribute to their install value.
 
+rpmrestore_all.pl will work on all installed packages.
+
 %description -l fr
 La base de données rpm conserve pour chaque fichier les attributs :
 proprietaire, groupe, taille, date de modification, checksum.
 Rpmrestore permet de comparer les attributs courants avec ceux de la base rpm, 
 et de les restaurer à leur valeur originale.
+
+rpmrestore_all.pl permet de travailler sur l'ensemble des packages rpm installés.
 
 %prep
 %setup
