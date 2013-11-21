@@ -17,7 +17,7 @@ DOCDIR=$(DESTDIR)/usr/share/doc/$(PACKAGE)-$(VERSION)
 
 DOC = Authors Changelog COPYING NEWS Todo $(PACKAGE).lsm $(PACKAGE).spec Makefile Readme rpmrestorerc.sample test_rpmrestore.pl
 
-PROGS =  $(PACKAGE)
+PROGS =  $(PACKAGE) rpmrestore_all.pl
 MANPAGES1 := $(addsuffix .1, $(PROGS))
 HTMLPAGES := $(addsuffix .1.html, $(PROGS))
 SCRIPTS := $(addsuffix .pl, $(PROGS) ) 
