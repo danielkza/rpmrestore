@@ -1,3 +1,11 @@
+			1.6 version
+			-------------
+new features :
+- add rpmrestore_all.pl tool
+- check if file is owned by several packages
+bugfix
+- bugfix interactive mode
+----------------------------------------------------------------
 			1.5 version
 			-------------
 new features :
