@@ -63,15 +63,18 @@ if ( open my $fh, 'rpm -Va |' ) {
 	while (<$fh>) {
 		chomp;
 
+		next if (m/^missing/);
+
 		# file name is the last field of the line
 		my @tab = split / /, $_;
 		## no critic (RequireNegativeIndices)
 		my $filename = $tab[$#tab];
+		print "debug file $filename ";
 
 		# get package from filename
 		## no critic (ProhibitBacktickOperators)
 		my $pac = `rpm -qf $filename`;
-		print "debug $filename to $pac\n";
+		print "to package $pac\n";
 
 		if ( exists $list{$pac} ) {
 
