@@ -58,6 +58,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %{_bindir}/rpmrestore_all.pl
 %dir %{_mandir}/man1
 %doc %{_mandir}/man1/rpmrestore.1*
+%doc %{_mandir}/man1/rpmrestore_all.1*
 %config(noreplace) /etc/rpmrestorerc
 %doc rpmrestore.lsm
 %doc Authors
