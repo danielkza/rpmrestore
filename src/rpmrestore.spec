@@ -53,10 +53,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 
 %files
 %defattr(-,root,root)
-%dir %{_bindir}
 %{_bindir}/rpmrestore.pl
 %{_bindir}/rpmrestore_all.pl
-%dir %{_mandir}/man1
 %doc %{_mandir}/man1/rpmrestore.1*
 %doc %{_mandir}/man1/rpmrestore_all.1*
 %config(noreplace) /etc/rpmrestorerc
