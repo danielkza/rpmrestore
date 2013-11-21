@@ -56,7 +56,7 @@ if ( GetOptions( \%opt, 'help|?', 'man', 'version', ) ) {
 # restore handler
 $SIG{__WARN__} = $save;
 
-# get list of all modified packages
+# get list of all modified files
 ## no critic (ProhibitTwoArgOpen)
 if ( open my $fh, 'rpm -Va |' ) {
 	my %list;
@@ -69,24 +69,27 @@ if ( open my $fh, 'rpm -Va |' ) {
 		my @tab = split / /, $_;
 		## no critic (RequireNegativeIndices)
 		my $filename = $tab[$#tab];
-		print "debug file $filename ";
 
-		# get package from filename
+		# get packages from filename
 		## no critic (ProhibitBacktickOperators)
-		my $pac = `rpm -qf $filename`;
-		print "to package $pac\n";
+		my $pacs = `rpm -qf $filename`;
+		my @pacs = split /\n/, $pacs;
 
-		if ( exists $list{$pac} ) {
+		foreach my $pac (@pacs) {
+			print "debug file $filename to package $pac\n";
 
-			# already seen package
-		}
-		else {
+			if ( exists $list{$pac} ) {
 
-			# mark as seen
-			$list{$pac} = 1;
+				# already seen package
+			}
+			else {
 
-			# restore attributes
-			system "rpmrestore.pl $args $pac";
+				# mark as seen
+				$list{$pac} = 1;
+
+				# restore attributes
+				system "rpmrestore.pl $args $pac";
+			}
 		}
 	}
 	## no critic(RequireCheckedClose,RequireCheckedSyscalls)
