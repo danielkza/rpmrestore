@@ -7,8 +7,7 @@
   <meta name="generator" content=
   "HTML Tidy for Linux (vers 25 March 2009), see www.w3.org" />
 
-  <title>rpmrestore.pl - restore attributes from rpm
-  database</title>
+  <title></title>
   <meta http-equiv="content-type" content=
   "text/html; charset=utf-8" />
   <link rev="made" href="mailto:root@localhost" />
@@ -18,91 +17,83 @@
   <table border="0" width="100%" cellspacing="0" cellpadding="3"
   summary="">
     <tr>
-      <td class="block" style="background-color: #cccccc" valign=
-      "middle"><big><strong><span class="block">&nbsp;rpmrestore.pl
-      - restore attributes from rpm
-      database</span></strong></big></td>
+      <td class="_podblock_" style="background-color: #cccccc"
+      valign="middle"><big><strong><span class=
+      "_podblock_">&nbsp;</span></strong></big></td>
     </tr>
-  </table><!-- INDEX BEGIN -->
+  </table>
 
-  <div>
-    <ul>
-      <li><a href="#name">NAME</a></li>
+  <ul id="index">
+    <li><a href="#NAME">NAME</a></li>
 
-      <li><a href="#description">DESCRIPTION</a></li>
+    <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
 
-      <li><a href="#synopsis">SYNOPSIS</a></li>
+    <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
 
-      <li><a href="#required_arguments">REQUIRED ARGUMENTS</a></li>
+    <li><a href="#REQUIRED-ARGUMENTS">REQUIRED ARGUMENTS</a></li>
 
-      <li><a href="#options">OPTIONS</a></li>
+    <li><a href="#OPTIONS">OPTIONS</a></li>
 
-      <li><a href="#usage">USAGE</a></li>
+    <li><a href="#USAGE">USAGE</a></li>
 
-      <li><a href="#configuration">CONFIGURATION</a></li>
+    <li><a href="#CONFIGURATION">CONFIGURATION</a></li>
 
-      <li><a href="#notes">NOTES</a></li>
+    <li><a href="#NOTES">NOTES</a></li>
 
-      <li><a href="#diagnostics">DIAGNOSTICS</a></li>
+    <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
 
-      <li><a href="#exit_status">EXIT STATUS</a></li>
+    <li><a href="#EXIT-STATUS">EXIT STATUS</a></li>
 
-      <li><a href="#dependencies">DEPENDENCIES</a></li>
+    <li><a href="#DEPENDENCIES">DEPENDENCIES</a></li>
 
-      <li><a href="#incompatibilities">INCOMPATIBILITIES</a></li>
+    <li><a href="#INCOMPATIBILITIES">INCOMPATIBILITIES</a></li>
 
-      <li><a href="#bugs_and_limitations">BUGS AND
-      LIMITATIONS</a></li>
+    <li><a href="#BUGS-AND-LIMITATIONS">BUGS AND
+    LIMITATIONS</a></li>
 
-      <li><a href="#see_also">SEE ALSO</a></li>
+    <li><a href="#SEE-ALSO">SEE ALSO</a></li>
 
-      <li><a href="#license_and_copyright">LICENSE AND
-      COPYRIGHT</a></li>
+    <li><a href="#LICENSE-AND-COPYRIGHT">LICENSE AND
+    COPYRIGHT</a></li>
 
-      <li><a href="#author">AUTHOR</a></li>
-    </ul>
-    <hr />
-  </div><!-- INDEX END -->
+    <li><a href="#AUTHOR">AUTHOR</a></li>
+  </ul>
 
-  <h1><a name="name" id="name">NAME</a></h1>
+  <h1 id="NAME">NAME</h1>
 
   <p>rpmrestore.pl - restore attributes from rpm database</p>
-  <hr />
 
-  <h1><a name="description" id="description">DESCRIPTION</a></h1>
+  <h1 id="DESCRIPTION">DESCRIPTION</h1>
 
   <p>The rpm database store user, group, time, mode for all files,
   and offer a command (rpm -V ) to display a summary of the changes
   between install state (database) and current disk state.
   Rpmrestore can display detailed changes and can restore install
   attributes.</p>
-  <hr />
 
-  <h1><a name="synopsis" id="synopsis">SYNOPSIS</a></h1>
+  <h1 id="SYNOPSIS">SYNOPSIS</h1>
 
   <p>rpmrestore.pl [options] [ target ]</p>
 
   <p>target:</p>
   <pre>
-   file|package         file or package
+<code>   file|package         file or package
    -package package     (deprecated) apply on designed package
-   -file filename       (deprecated) apply on designed file
+   -file filename       (deprecated) apply on designed file</code>
 </pre>
 
   <p>options:</p>
   <pre>
-   -help                brief help message
+<code>   -help                brief help message
    -man                 full documentation
    -V, --version        print version
-</pre>
-  <pre>
+
    -verbose             verbose
    -batch               batch mode (ask no questions)
    -n, --dry-run        do not perform any change
    -log logfile         log action in logfile
    -rollback logfile    restore attributes from logfile (written by -log)
-</pre>
-  <pre>
+
   -all          apply on all attributes
   -user         apply on user
   -group        apply on group
@@ -110,124 +101,107 @@
   -time         apply on mtime
   -size         apply on size (just display)
   -md5          apply on md5 (just display)
-  -capability   apply on capabilities
+  -capability   apply on capabilities</code>
 </pre>
-  <hr />
 
-  <h1><a name="required_arguments" id="required_arguments">REQUIRED
-  ARGUMENTS</a></h1>
+  <h1 id="REQUIRED-ARGUMENTS">REQUIRED ARGUMENTS</h1>
 
   <p>you should provide a target, to work on</p>
 
   <p>this can be</p>
 
   <dl>
-    <dt><strong><a name="package" class="item" id=
-    "package"><strong>-package</strong></a></strong></dt>
+    <dt id="package"><b>-package</b></dt>
 
     <dd>
       <p>The program works on designed installed rpm package.</p>
     </dd>
 
-    <dt><strong><a name="file" class="item" id=
-    "file"><strong>-file</strong></a></strong></dt>
+    <dt id="file"><b>-file</b></dt>
 
     <dd>
       <p>The program works on designed file, which should be a part
       from a rpm package.</p>
     </dd>
 
-    <dt><strong><a name="rollback" class="item" id=
-    "rollback"><strong>-rollback</strong></a></strong></dt>
+    <dt id="rollback"><b>-rollback</b></dt>
 
     <dd>
       <p>The program works from designed log file, and rollback
       (revert) the changes.</p>
     </dd>
   </dl>
-  <hr />
 
-  <h1><a name="options" id="options">OPTIONS</a></h1>
+  <h1 id="OPTIONS">OPTIONS</h1>
 
   <dl>
-    <dt><strong><a name="help" class="item" id=
-    "help"><strong>-help</strong></a></strong></dt>
+    <dt id="help"><b>-help</b></dt>
 
     <dd>
       <p>Print a brief help message and exits.</p>
     </dd>
 
-    <dt><strong><a name="man" class="item" id=
-    "man"><strong>-man</strong></a></strong></dt>
+    <dt id="man"><b>-man</b></dt>
 
     <dd>
       <p>Print the manual page and exits.</p>
     </dd>
 
-    <dt><strong><a name="version" class="item" id=
-    "version"><strong>-version</strong></a></strong></dt>
+    <dt id="version"><b>-version</b></dt>
 
     <dd>
       <p>Print the program release and exit.</p>
     </dd>
 
-    <dt><strong><a name="verbose" class="item" id=
-    "verbose"><strong>-verbose</strong></a></strong></dt>
+    <dt id="verbose"><b>-verbose</b></dt>
 
     <dd>
       <p>The program works and print debugging messages.</p>
     </dd>
 
-    <dt><strong><a name="batch" class="item" id=
-    "batch"><strong>-batch</strong></a></strong></dt>
+    <dt id="batch"><b>-batch</b></dt>
 
     <dd>
       <p>The program works without interactive questions (the
       default mode is interactive)</p>
     </dd>
 
-    <dt><strong><a name="dryrun" class="item" id=
-    "dryrun"><strong>-dryrun</strong></a></strong></dt>
+    <dt id="dryrun"><b>-dryrun</b></dt>
 
     <dd>
       <p>The program just show the changes but not perform any
       restore</p>
     </dd>
 
-    <dt><strong><a name="log" class="item" id=
-    "log"><strong>-log</strong></a></strong></dt>
+    <dt id="log"><b>-log</b></dt>
 
     <dd>
       <p>The program write the changes in designed log file. This
       file can be used for rollback.</p>
     </dd>
 
-    <dt><strong><a name="package2" class="item" id=
-    "package2"><strong>-package</strong></a></strong></dt>
+    <dt id="package1"><b>-package</b></dt>
 
     <dd>
       <p>(deprecated) The program works on designed installed rpm
       package.</p>
     </dd>
 
-    <dt><strong><a name="file2" class="item" id=
-    "file2"><strong>-file</strong></a></strong></dt>
+    <dt id="file1"><b>-file</b></dt>
 
     <dd>
       <p>(deprecated) The program works on designed file, which
       should be a part from a rpm package.</p>
     </dd>
 
-    <dt><strong><a name="rollback2" class="item" id=
-    "rollback2"><strong>-rollback</strong></a></strong></dt>
+    <dt id="rollback1"><b>-rollback</b></dt>
 
     <dd>
       <p>The program works from designed log file, and rollback
       (revert) the changes.</p>
     </dd>
 
-    <dt><strong><a name="all" class="item" id=
-    "all"><strong>-all</strong></a></strong></dt>
+    <dt id="all"><b>-all</b></dt>
 
     <dd>
       <p>If no attribute are specified, the program work on all, as
@@ -235,45 +209,39 @@
       -time -size -md5</p>
     </dd>
 
-    <dt><strong><a name="user" class="item" id=
-    "user"><strong>-user</strong></a></strong></dt>
+    <dt id="user"><b>-user</b></dt>
 
     <dd>
       <p>This is the owner attribute</p>
     </dd>
 
-    <dt><strong><a name="group" class="item" id=
-    "group"><strong>-group</strong></a></strong></dt>
+    <dt id="group"><b>-group</b></dt>
 
     <dd>
       <p>This is the group attribute</p>
     </dd>
 
-    <dt><strong><a name="mode" class="item" id=
-    "mode"><strong>-mode</strong></a></strong></dt>
+    <dt id="mode"><b>-mode</b></dt>
 
     <dd>
       <p>This is the file permissions : read-write-execute for
       user, group, other</p>
     </dd>
 
-    <dt><strong><a name="time" class="item" id=
-    "time"><strong>-time</strong></a></strong></dt>
+    <dt id="time"><b>-time</b></dt>
 
     <dd>
       <p>This attribute is the date of last changes on file.</p>
     </dd>
 
-    <dt><strong><a name="size" class="item" id=
-    "size"><strong>-size</strong></a></strong></dt>
+    <dt id="size"><b>-size</b></dt>
 
     <dd>
       <p>This is the file size attribute. This is a "read-only"
       attribute : it can not be restored by the program.</p>
     </dd>
 
-    <dt><strong><a name="md5" class="item" id=
-    "md5"><strong>-md5</strong></a></strong></dt>
+    <dt id="md5"><b>-md5</b></dt>
 
     <dd>
       <p>md5 is a checksum (a kind of fingerprint) : if the file
@@ -283,8 +251,7 @@
       restored by the program.</p>
     </dd>
 
-    <dt><strong><a name="capability" class="item" id=
-    "capability"><strong>-capability</strong></a></strong></dt>
+    <dt id="capability"><b>-capability</b></dt>
 
     <dd>
       <p>capability means for posix capability. This is not
@@ -292,57 +259,53 @@
       getcap/setcap man pages for more informations.</p>
     </dd>
   </dl>
-  <hr />
 
-  <h1><a name="usage" id="usage">USAGE</a></h1>
+  <h1 id="USAGE">USAGE</h1>
 
   <p>the rpm command to control changes on rpm package</p>
   <pre>
-
-  rpm -V rpm
+<code>  rpm -V rpm</code>
 </pre>
 
   <p>same effect (just display) but more detailed (display
   values)</p>
   <pre>
-  rpmrestore.pl -n rpm
+<code>  rpmrestore.pl -n rpm</code>
 </pre>
 
   <p>interactive change mode, only on time attribute</p>
   <pre>
-  rpmrestore.pl -time rpm
+<code>  rpmrestore.pl -time rpm</code>
 </pre>
 
   <p>interactive change mode, on all attributes except time
   attribute</p>
   <pre>
-  rpmrestore.pl -all -notime rpm
+<code>  rpmrestore.pl -all -notime rpm</code>
 </pre>
 
   <p>batch change mode (DANGEROUS) on mode attribute with log
   file</p>
   <pre>
-  rpmrestore.pl -batch -log /tmp/log rpm
+<code>  rpmrestore.pl -batch -log /tmp/log rpm</code>
 </pre>
 
   <p>interactive change of mode attribute on file /etc/motd</p>
   <pre>
-  rpmrestore.pl -mode /etc/motd
+<code>  rpmrestore.pl -mode /etc/motd</code>
 </pre>
 
   <p>interactive rollback from /tmp/log</p>
   <pre>
-  rpmrestore.pl -rollback /tmp/log
+<code>  rpmrestore.pl -rollback /tmp/log</code>
 </pre>
 
   <p>batch rollback user changes from /tmp/log</p>
   <pre>
-  rpmrestore.pl -batch -user -rollback /tmp/log
+<code>  rpmrestore.pl -batch -user -rollback /tmp/log</code>
 </pre>
-  <hr />
 
-  <h1><a name="configuration" id=
-  "configuration">CONFIGURATION</a></h1>
+  <h1 id="CONFIGURATION">CONFIGURATION</h1>
 
   <p>the program can read rcfile if some exists. it will load in
   order</p>
@@ -367,75 +330,61 @@
   <p>dry-run = 1</p>
 
   <p>batch = 0</p>
-  <hr />
 
-  <h1><a name="notes" id="notes">NOTES</a></h1>
+  <h1 id="NOTES">NOTES</h1>
 
   <p>you should be superuser to restore attributes, other users can
   only check changes</p>
 
   <p>on batch mode, we recommend to use log file</p>
-  <hr />
 
-  <h1><a name="diagnostics" id="diagnostics">DIAGNOSTICS</a></h1>
+  <h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
 
   <p>(to be filled)</p>
-  <hr />
 
-  <h1><a name="exit_status" id="exit_status">EXIT STATUS</a></h1>
+  <h1 id="EXIT-STATUS">EXIT STATUS</h1>
 
   <p>the program should allways exit with code 0</p>
-  <hr />
 
-  <h1><a name="dependencies" id=
-  "dependencies">DEPENDENCIES</a></h1>
+  <h1 id="DEPENDENCIES">DEPENDENCIES</h1>
 
   <p>this program uses "standard" perl modules (distributed with
   perl core) : POSIX Digest::MD5 English Getopt::Long Pod::Usage
   POSIX Digest::MD5 File::stat Data::Dumper</p>
-  <hr />
 
-  <h1><a name="incompatibilities" id=
-  "incompatibilities">INCOMPATIBILITIES</a></h1>
+  <h1 id="INCOMPATIBILITIES">INCOMPATIBILITIES</h1>
 
   <p>none is known</p>
-  <hr />
 
-  <h1><a name="bugs_and_limitations" id="bugs_and_limitations">BUGS
-  AND LIMITATIONS</a></h1>
+  <h1 id="BUGS-AND-LIMITATIONS">BUGS AND LIMITATIONS</h1>
 
   <p>this program can revert changes on user, group, time,
   properties, but not on size and md5 : it can only show the
   differences</p>
-  <hr />
 
-  <h1><a name="see_also" id="see_also">SEE ALSO</a></h1>
-  <hr />
+  <h1 id="SEE-ALSO">SEE ALSO</h1>
 
-  <h1><a name="license_and_copyright" id=
-  "license_and_copyright">LICENSE AND COPYRIGHT</a></h1>
+  <h1 id="LICENSE-AND-COPYRIGHT">LICENSE AND COPYRIGHT</h1>
 
   <p>Copyright (C) 2006 by Eric Gerbier This program is free
   software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free
   Software Foundation; either version 2 of the License, or (at your
   option) any later version.</p>
-  <hr />
 
-  <h1><a name="author" id="author">AUTHOR</a></h1>
+  <h1 id="AUTHOR">AUTHOR</h1>
 
   <p>Eric Gerbier</p>
 
-  <p>you can report any bug or suggest to <a href=
-  "mailto:gerbier@users.sourceforge.net">gerbier@users.sourceforge.net</a></p>
+  <p>you can report any bug or suggest to
+  gerbier@users.sourceforge.net</p>
 
   <table border="0" width="100%" cellspacing="0" cellpadding="3"
   summary="">
     <tr>
-      <td class="block" style="background-color: #cccccc" valign=
-      "middle"><big><strong><span class="block">&nbsp;rpmrestore.pl
-      - restore attributes from rpm
-      database</span></strong></big></td>
+      <td class="_podblock_" style="background-color: #cccccc"
+      valign="middle"><big><strong><span class=
+      "_podblock_">&nbsp;</span></strong></big></td>
     </tr>
   </table>
 </body>
