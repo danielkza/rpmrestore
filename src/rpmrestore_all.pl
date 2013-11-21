@@ -28,56 +28,67 @@ use Pod::Usage;      # man page
 my $version = '0.1';
 
 # allow pass args to rpmrestore
-my $args = join ' ', @ARGV;
+my $args = join q{ }, @ARGV;
 
 my %opt;
 Getopt::Long::Configure('no_ignore_case');
 
 # to avoid warnings from Getopt
 my $save = $SIG{__WARN__};
-$SIG{__WARN__} = sub {};
-if ( GetOptions( \%opt,        'help|?',  'man', 'version',) ) {
+$SIG{__WARN__} = sub { };
+if ( GetOptions( \%opt, 'help|?', 'man', 'version', ) ) {
+
 	# help for this program
-	if ($opt{'help'}) {
+	if ( $opt{'help'} ) {
 		pod2usage(1);
 	}
-	elsif ($opt{'man'}) {
+	elsif ( $opt{'man'} ) {
 		pod2usage( -verbose => 2 );
 	}
-	elsif ($opt{'version'}) {
+	elsif ( $opt{'version'} ) {
 		print "$PROGRAM_NAME version $version\n";
 		exit;
 	}
 }
+
 # restore handler
 $SIG{__WARN__} = $save;
 
 # get list of all modified packages
-if (open my $fh, 'rpm -Va |') {
+## no critic (ProhibitTwoArgOpen)
+if ( open my $fh, 'rpm -Va |' ) {
 	my %list;
 	while (<$fh>) {
 		chomp;
+
 		# file name is the last field of the line
 		my @tab = split / /, $_;
-		my $filename = $tab[ $#tab ];
+		## no critic (RequireNegativeIndices)
+		my $filename = $tab[$#tab];
 
 		# get package from filename
+		## no critic (ProhibitBacktickOperators)
 		my $pac = `rpm -qf $filename`;
 		print "debug $filename to $pac\n";
 
-		if (exists $list{ $pac }) {
+		if ( exists $list{$pac} ) {
+
 			# already seen package
-		} else {
+		}
+		else {
+
 			# mark as seen
-			$list{ $pac } = 1;
+			$list{$pac} = 1;
 
 			# restore attributes
-			system("rpmrestore.pl $args $pac");
+			system "rpmrestore.pl $args $pac";
 		}
 	}
+	## no critic(RequireCheckedClose,RequireCheckedSyscalls)
 	close $fh;
-} else {
-	warn "can not get list of modified packages : $!\n";
+}
+else {
+	warn "can not get list of modified packages : $ERRNO\n";
 }
 
 __END__
