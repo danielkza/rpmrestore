@@ -34,6 +34,8 @@ my %opt;
 Getopt::Long::Configure('no_ignore_case');
 
 # to avoid warnings from Getopt
+# the idea is to trap help options and pass
+# all others options to rpmrestore.pl
 my $save = $SIG{__WARN__};
 $SIG{__WARN__} = sub { };
 if ( GetOptions( \%opt, 'help|?', 'man', 'version', ) ) {
@@ -102,7 +104,8 @@ rpmrestore_all.pl - restore all attributes from rpm database
 The rpm database store user, group, time, mode for all files,
 and offer a command (rpm -V ) to display a summary of the changes between 
 install state (database) and current disk state. 
-Rpmrestore can display detailed changes and can restore install attributes.
+rpmrestore_all will allow to display changes and restores install attributes
+for all installed packages, using rpmrestore.pl tool.
 
 =head1 SYNOPSIS
 
@@ -127,6 +130,7 @@ options:
   -time		apply on mtime
   -size		apply on size (just display)
   -md5		apply on md5 (just display)
+  -capability	apply on capabilities
 
 =head1 REQUIRED ARGUMENTS
 
@@ -214,9 +218,6 @@ batch change mode (DANGEROUS) on mode attribute with log file
 
   rpmrestore_all.pl -batch -log /tmp/log
 
-interactive change of mode attribute on file /etc/motd
-
-  rpmrestore_all.pl -mode 
 
 =head1 CONFIGURATION
 
