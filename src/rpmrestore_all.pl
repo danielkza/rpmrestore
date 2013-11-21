@@ -57,7 +57,7 @@ if ( GetOptions( \%opt, 'help|?', 'man', 'version', ) ) {
 $SIG{__WARN__} = $save;
 
 # get list of all modified files
-## no critic (ProhibitTwoArgOpen)
+## no critic (ProhibitTwoArgOpen,RequireBriefOpen)
 if ( open my $fh, 'rpm -Va |' ) {
 	my %list;
 	while (<$fh>) {
