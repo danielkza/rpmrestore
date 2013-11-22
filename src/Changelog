@@ -2,6 +2,7 @@
 	* add rpmrestore_all.pl tool
 	* bugfix interactive mode
 	* check if file is owned by several packages
+	* in rpm, remove directories defined in fhs
 
 2012-08-03 Eric Gerbier <gerbier@users.sourceforge.net> 1.5
 	* change api to be more natural (-f/-p otions are deprecated)
