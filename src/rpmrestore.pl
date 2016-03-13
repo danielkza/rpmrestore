@@ -112,7 +112,7 @@ sub get_rpm_infos($) {
 	my $queryformat =
 
 #  tab   0               1                  2                3               4            5            6          7
-"[%{FILENAMES} %6.6{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILEMD5S} $query_cap\\n]";
+"[%{FILENAMES} %{FILEMODES:octal} %{FILEUSERNAME} %{FILEGROUPNAME} %{FILEMTIMES} %{FILESIZES} %{FILEMD5S} $query_cap\\n]";
 	my $cmd = "rpm -q --queryformat \"$queryformat\" $package";
 	debug($cmd);
 
@@ -807,7 +807,7 @@ sub display_capability($$$$$) {
 		my $action = sub { change_capa( $rpm_cap, $filename ); };
 		ask(
 			$opt_dryrun,  $opt_batch, $action, $filename,
-			'capability', $rpm_cap,   $h_capa
+			'capability', $rpm_cap,   $h_capa // ''
 		);
 	}
 	else {
